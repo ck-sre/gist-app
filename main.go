@@ -15,11 +15,26 @@ func landing(a http.ResponseWriter, b *http.Request) {
 }
 
 func gistWrite(a http.ResponseWriter, b *http.Request) {
-	a.Write([]byte("Here's a new gist we're writing"))
+	if b.Method != http.MethodPost {
+		a.Header().Set("Allow", http.MethodPost)
+		//a.Header().Set("Content-Type", "application/json")
+		http.Error(a, "That's a wrong method for this path", http.StatusMethodNotAllowed)
+		return
+	}
+
+	a.Write([]byte(`{"Responseey": "Here's a new gist we're writing"}`))
+
 }
 
 func gistView(a http.ResponseWriter, b *http.Request) {
-	a.Write([]byte("This is a gist"))
+	a.Header().Set("Content-Type", "application/json")
+	a.Header().Set("Cache-Control", "public, max-age=12345600")
+	a.Header().Add("Cache-Control", "public")
+	a.Header().Add("Cache-Control", "max-age=12345600")
+	//a.Header().Del("Cache-Control")
+	//fmt.Println(a.Header().Values("Cache-Control"))
+	a.Write([]byte(`{"ResponseKey": "This is a gist"}`))
+
 }
 
 func main() {
