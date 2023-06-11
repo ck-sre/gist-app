@@ -2,17 +2,36 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
 
 // landing function gives byte slice as a response body
 func landing(a http.ResponseWriter, b *http.Request) {
-	if b.URL.Path == "/" {
+	if b.URL.Path != "/" {
 		http.NotFound(a, b)
 		return
 	}
-	a.Write([]byte("Here's the landing space for Gists"))
+
+	tmpls := []string{
+		"./ui/html/lowestlayer.tmpl",
+		"./ui/html/partials/redirect.tmpl",
+		"./ui/html/pages/landing.tmpl",
+	}
+
+	ps, err := template.ParseFiles(tmpls...)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(a, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	err = ps.ExecuteTemplate(a, "lowestlayer", nil)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(a, "Internal Server Error after execution", http.StatusInternalServerError)
+	}
 }
 
 func gistWrite(a http.ResponseWriter, b *http.Request) {
