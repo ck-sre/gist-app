@@ -8,6 +8,11 @@ import (
 func main() {
 	//Initialize new servemux register landing as a handler
 	svrMux := http.NewServeMux()
+
+	fs := http.FileServer(http.Dir("./ui/static/"))
+
+	svrMux.Handle("/static/", http.StripPrefix("/static", fs))
+
 	svrMux.HandleFunc("/", landing)
 	svrMux.HandleFunc("/new", gistWrite)
 	svrMux.HandleFunc("/get", gistView)
