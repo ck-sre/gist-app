@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -48,13 +49,23 @@ func gistView(a http.ResponseWriter, b *http.Request) {
 }
 
 func main() {
+
+	//port := flag.String("port", ":9000", "Network listening port")
+
+	type cfg struct {
+		port string
+	}
+	var cf cfg
+	flag.StringVar(&cf.port, "port", ":9000", "network port to bind to")
+	flag.Parse()
+
 	//Initialize new servemux register landing as a handler
 	svrMux := http.NewServeMux()
 	svrMux.HandleFunc("/", landing)
 	svrMux.HandleFunc("/new", gistWrite)
 	svrMux.HandleFunc("/get", gistView)
 
-	log.Print("Listening on :9000")
-	err := http.ListenAndServe(":9000", svrMux)
+	log.Printf("Listening on %s", cf.port)
+	err := http.ListenAndServe(cf.port, svrMux)
 	log.Fatal(err)
 }
