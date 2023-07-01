@@ -3,15 +3,14 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
 // landing function gives byte slice as a response body
-func landing(a http.ResponseWriter, b *http.Request) {
+func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 	if b.URL.Path != "/" {
-		http.NotFound(a, b)
+		m.noFound(a)
 		return
 	}
 
@@ -23,22 +22,21 @@ func landing(a http.ResponseWriter, b *http.Request) {
 
 	ps, err := template.ParseFiles(tmpls...)
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(a, "Internal Server Error", http.StatusInternalServerError)
+		m.serverErr(a, err)
 		return
 	}
 	err = ps.ExecuteTemplate(a, "lowestlayer", nil)
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(a, "Internal Server Error after execution", http.StatusInternalServerError)
+		m.eLog.Print(err.Error())
+		m.serverErr(a, err)
 	}
 }
 
-func gistWrite(a http.ResponseWriter, b *http.Request) {
+func (m *mission) gistWrite(a http.ResponseWriter, b *http.Request) {
 	if b.Method != http.MethodPost {
 		a.Header().Set("Allow", http.MethodPost)
 		//a.Header().Set("Content-Type", "application/json")
-		http.Error(a, "That's a wrong method for this path", http.StatusMethodNotAllowed)
+		m.clErr(a, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -46,11 +44,11 @@ func gistWrite(a http.ResponseWriter, b *http.Request) {
 
 }
 
-func gistView(a http.ResponseWriter, b *http.Request) {
+func (m *mission) gistView(a http.ResponseWriter, b *http.Request) {
 
 	gistId, err := strconv.Atoi(b.URL.Query().Get("gistid"))
 	if err != nil || gistId < 1 {
-		http.NotFound(a, b)
+		m.noFound(a)
 		return
 	}
 
