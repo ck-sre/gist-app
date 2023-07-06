@@ -21,6 +21,7 @@ func main() {
 
 	flag.StringVar(&cf.port, "port", ":9100", "port to listen on")
 	flag.Parse()
+
 	//Logging
 
 	logInfo := log.New(log.Writer(), "INFO\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -30,22 +31,12 @@ func main() {
 		eLog: logErr,
 		iLog: logInfo,
 	}
-	//Initialize new servemux register landing as a handler
-	svrMux := http.NewServeMux()
-
-	fs := http.FileServer(http.Dir("./ui/static/"))
 
 	customSvr := &http.Server{
 		Addr:     cf.port,
 		ErrorLog: logErr,
 		Handler:  svrMux,
 	}
-
-	svrMux.Handle("/static/", http.StripPrefix("/static", fs))
-
-	svrMux.HandleFunc("/", msn.landing)
-	svrMux.HandleFunc("/new", msn.gistWrite)
-	svrMux.HandleFunc("/get", msn.gistView)
 
 	logInfo.Printf("Listening on %s", cf.port)
 	err := customSvr.ListenAndServe()
