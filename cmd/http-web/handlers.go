@@ -15,7 +15,7 @@ func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 	}
 
 	tmpls := []string{
-		"./ui/html/lowestlayer.tmpl",
+		"./ui/html/baselayer.tmpl",
 		"./ui/html/partials/redirect.tmpl",
 		"./ui/html/pages/landing.tmpl",
 	}
@@ -25,7 +25,7 @@ func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 		m.serverErr(a, err)
 		return
 	}
-	err = ps.ExecuteTemplate(a, "lowestlayer", nil)
+	err = ps.ExecuteTemplate(a, "baselayer", nil)
 	if err != nil {
 		m.eLog.Print(err.Error())
 		m.serverErr(a, err)
@@ -40,7 +40,7 @@ func (m *mission) gistWrite(a http.ResponseWriter, b *http.Request) {
 		return
 	}
 
-	a.Write([]byte(`{"Responseey": "Here's a new gist we're writing"}`))
+	a.Write([]byte(`{"Response": "Here's a new gist we're writing"}`))
 
 }
 
@@ -56,6 +56,7 @@ func (m *mission) gistView(a http.ResponseWriter, b *http.Request) {
 	a.Header().Set("Cache-Control", "public, max-age=12345600")
 	a.Header().Add("Cache-Control", "public")
 	a.Header().Add("Cache-Control", "max-age=12345600")
+	a.Header()["X-XSS-Protection"] = []string{"1; mode=block"}
 	//a.Header().Del("Cache-Control")
 	//fmt.Println(a.Header().Values("Cache-Control"))
 	//a.Write([]byte(`{"ResponseKey": "This is a gist"}`))
