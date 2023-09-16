@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-func (msn *mission) paths() {
+func (msn *mission) paths() *http.ServeMux {
 	mx := http.NewServeMux()
 	fs := http.FileServer(http.Dir("./ui/static/"))
 	mx.Handle("/static/", http.StripPrefix("/static", fs))

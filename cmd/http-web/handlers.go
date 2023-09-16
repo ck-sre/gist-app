@@ -22,23 +22,36 @@ func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 
 	ps, err := template.ParseFiles(tmpls...)
 	if err != nil {
-		m.serverErr(a, err)
+		m.serverErr(a, b, err)
 		return
 	}
 	err = ps.ExecuteTemplate(a, "baselayer", nil)
 	if err != nil {
-		m.eLog.Print(err.Error())
-		m.serverErr(a, err)
+		//m.eLog.Print(err.Error())
+		m.serverErr(a, b, err)
+		//m.logger.Error(err.Error(), "method", b.Method, "uri", b.URL.RequestURI())
+		//http.Error(a, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }
 
 func (m *mission) gistWrite(a http.ResponseWriter, b *http.Request) {
 	if b.Method != http.MethodPost {
 		a.Header().Set("Allow", http.MethodPost)
-		//a.Header().Set("Content-Type", "application/json")
 		m.clErr(a, http.StatusMethodNotAllowed)
 		return
 	}
+
+	title := "No suspension"
+	content := "Noone wants a suspension when a new gist is created, its for the help of humanity"
+	expires := 7
+
+	gistid, err := m.gists.Add(title, content, expires)
+	if err != nil {
+		m.serverErr(a, b, err)
+		return
+	}
+
+	http.Redirect(a, b, fmt.Sprintf("/get?gistid=%d", gistid), http.StatusSeeOther)
 
 	a.Write([]byte(`{"Response": "Here's a new gist we're writing"}`))
 
@@ -60,6 +73,6 @@ func (m *mission) gistView(a http.ResponseWriter, b *http.Request) {
 	//a.Header().Del("Cache-Control")
 	//fmt.Println(a.Header().Values("Cache-Control"))
 	//a.Write([]byte(`{"ResponseKey": "This is a gist"}`))
-	fmt.Fprint(a, "This is a gist with a specific id %d..", gistId)
+	fmt.Fprintf(a, "This is a gist with a specific id %d..", gistId)
 
 }

@@ -11,3 +11,6 @@ insert into gists (title, content, created, expires) values
 create user 'gistuser'@'localhost' identified by 'gistpass';
 grant select, insert, update, delete on gistapp.* to 'gistuser'@'localhost';
 alter user 'gistuser'@'localhost' identified by '<redacted>';
+
+
+select id, title, content, created, expires from gists;
