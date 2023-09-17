@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"gistapp.ck89.net/internal/dblayer"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -65,6 +67,16 @@ func (m *mission) gistView(a http.ResponseWriter, b *http.Request) {
 		return
 	}
 
+	gst, err := m.gists.Retrieve(gistId)
+	if err != nil {
+		if errors.Is(err, dblayer.ErrNoRecord) {
+			m.noFound(a)
+		} else {
+			m.serverErr(a, b, err)
+		}
+		return
+	}
+
 	a.Header().Set("Content-Type", "application/json")
 	a.Header().Set("Cache-Control", "public, max-age=12345600")
 	a.Header().Add("Cache-Control", "public")
@@ -73,6 +85,6 @@ func (m *mission) gistView(a http.ResponseWriter, b *http.Request) {
 	//a.Header().Del("Cache-Control")
 	//fmt.Println(a.Header().Values("Cache-Control"))
 	//a.Write([]byte(`{"ResponseKey": "This is a gist"}`))
-	fmt.Fprintf(a, "This is a gist with a specific id %d..", gistId)
+	fmt.Fprintf(a, "+%v", gst)
 
 }

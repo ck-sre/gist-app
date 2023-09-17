@@ -2,6 +2,7 @@ package dblayer
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -33,8 +34,23 @@ func (g *Gistdblayer) Add(title, content string, expiresOn int) (int, error) {
 	return int(gistid), nil
 }
 
-func (g *Gistdblayer) Retrieve(id int) (*Gist, error) {
-	return nil, nil
+func (g *Gistdblayer) Retrieve(id int) (Gist, error) {
+	qstmt := `SELECT id, title, content, created, expires FROM gists
+    WHERE expires > UTC_TIMESTAMP() AND id = ?`
+	rrow := g.DB.QueryRow(qstmt, id)
+
+	var gst Gist
+
+	err := rrow.Scan(&gst.ID, &gst.Title, &gst.Content, &gst.CreatedOn, &gst.ExpiresOn)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return Gist{}, ErrNoRecord
+
+		} else {
+			return Gist{}, err
+		}
+	}
+	return gst, nil
 }
 
 func (g *Gistdblayer) Recent() ([]Gist, error) {
