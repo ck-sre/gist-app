@@ -11,5 +11,6 @@ func (msn *mission) paths() *http.ServeMux {
 	mx.Handle("/", http.HandlerFunc(msn.landing))
 	mx.Handle("/new", http.HandlerFunc(msn.gistWrite))
 	mx.Handle("/get", http.HandlerFunc(msn.gistView))
+	mx.Handle("/recents", http.HandlerFunc(msn.gistRecents))
 	return mx
 }

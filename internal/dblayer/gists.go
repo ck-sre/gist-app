@@ -54,5 +54,25 @@ func (g *Gistdblayer) Retrieve(id int) (Gist, error) {
 }
 
 func (g *Gistdblayer) Recent() ([]Gist, error) {
-	return nil, nil
+	qstmt := `SELECT id, title, content, created, expires FROM gists
+    WHERE expires > UTC_TIMESTAMP() ORDER BY id DESC LIMIT 5`
+	mrows, err := g.DB.Query(qstmt)
+	if err != nil {
+		return nil, err
+	}
+
+	defer mrows.Close()
+	var gsts []Gist
+	for mrows.Next() {
+		var gst Gist
+		err = mrows.Scan(&gst.ID, &gst.Title, &gst.Content, &gst.CreatedOn, &gst.ExpiresOn)
+		if err != nil {
+			return nil, err
+		}
+		gsts = append(gsts, gst)
+	}
+	if err = mrows.Err(); err != nil {
+		return nil, err
+	}
+	return gsts, nil
 }

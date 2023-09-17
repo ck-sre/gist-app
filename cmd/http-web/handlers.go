@@ -88,3 +88,27 @@ func (m *mission) gistView(a http.ResponseWriter, b *http.Request) {
 	fmt.Fprintf(a, "+%v", gst)
 
 }
+
+func (m *mission) gistRecents(a http.ResponseWriter, b *http.Request) {
+
+	gsts, err := m.gists.Recent()
+	if err != nil {
+		if errors.Is(err, dblayer.ErrNoRecord) {
+			m.noFound(a)
+		} else {
+			m.serverErr(a, b, err)
+		}
+		return
+	}
+
+	a.Header().Set("Content-Type", "application/json")
+	a.Header().Set("Cache-Control", "public, max-age=12345600")
+	a.Header().Add("Cache-Control", "public")
+	a.Header().Add("Cache-Control", "max-age=12345600")
+	a.Header()["X-XSS-Protection"] = []string{"1; mode=block"}
+	//a.Header().Del("Cache-Control")
+	//fmt.Println(a.Header().Values("Cache-Control"))
+	//a.Write([]byte(`{"ResponseKey": "This is a gist"}`))
+	fmt.Fprintf(a, "+%v", gsts)
+
+}
