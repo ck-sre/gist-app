@@ -10,13 +10,15 @@
     <h1><a href='/'>Gist App</a></h1>
 </header>
 {{ template "redirect" .}}
-<main>
+<start>
     {{template "start" .}}
     {{block "additionalblockedbar" .}}
         <p>Some default content</p>
-        {{end}}
-</main>
-<footer>Powered by <a href='https://golang.org/'>Go</a></footer>
+     {{end}}
+</start>
 </body>
 </html>
-        {{end}}
+
+<footer>Powered by <a href='https://golang.org/'>Go</a></footer>
+
+{{end}}

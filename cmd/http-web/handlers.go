@@ -77,6 +77,28 @@ func (m *mission) gistView(a http.ResponseWriter, b *http.Request) {
 		return
 	}
 
+	tmpls := []string{
+		"./ui/html/baselayer.tmpl",
+		"./ui/html/partials/redirect.tmpl",
+		"./ui/html/pages/viewlayer.tmpl",
+	}
+
+	pt, err := template.ParseFiles(tmpls...)
+	if err != nil {
+		m.serverErr(a, b, err)
+		return
+	}
+
+	gstData := tmplData{
+		TmplGst: gst,
+	}
+
+	err = pt.ExecuteTemplate(a, "baselayer", gstData)
+	if err != nil {
+		m.serverErr(a, b, err)
+		return
+	}
+
 	a.Header().Set("Content-Type", "application/json")
 	a.Header().Set("Cache-Control", "public, max-age=12345600")
 	a.Header().Add("Cache-Control", "public")
@@ -85,7 +107,7 @@ func (m *mission) gistView(a http.ResponseWriter, b *http.Request) {
 	//a.Header().Del("Cache-Control")
 	//fmt.Println(a.Header().Values("Cache-Control"))
 	//a.Write([]byte(`{"ResponseKey": "This is a gist"}`))
-	fmt.Fprintf(a, "+%v", gst)
+	//fmt.Fprintf(a, "+%v", gst)
 
 }
 
