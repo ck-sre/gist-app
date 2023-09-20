@@ -1,14 +1,16 @@
 {{ define "heading"}}Gist #{{ .TmplGst.ID }}{{end}}
 {{ define "start"}}
-    <div class='gist'>
-        <div class='metadata'>
-            <strong>{{ .TmplGst.Title }}</strong>
-            <span>#{{ .TmplGst.ID }}</span>
+   {{ with .TmplGst }}
+        <div class='gist'>
+            <div class='metadata'>
+                <strong>{{ .Title }}</strong>
+                <span>#{{ .ID }}</span>
+            </div>
+            <pre>{{ .Content }}</pre>
+            <div class='metadata'>
+                <span>{{ .CreatedOn.Weekday }}</span>
+                <time>{{ .ExpiresOn.AddDate 0 1 0 }}</time>
+            </div>
         </div>
-        <pre>{{ .TmplGst.Content }}</pre>
-        <div class='metadata'>
-            <span>{{ .TmplGst.CreatedOn.Weekday }}</span>
-            <time>{{ .TmplGst.ExpiresOn.AddDate 0 1 0 }}</time>
-        </div>
-    </div>
+    {{ end }}
 {{ end }}

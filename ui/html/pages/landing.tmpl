@@ -1,5 +1,23 @@
 {{ define "heading"}}Landing{{end}}
-{{define "start"}}
+{{ define "start"}}
     <h2>Recent gist apps</h2>
+
+    {{ if .TmplGstList }}
+    <table>
+        <tr>
+            <th>Topic</th>
+            <th>Created</th>
+            <th>ID</th>
+        </tr>
+        {{ range .TmplGstList }}
+        <tr>
+            <td><a href="/gists/{{ .ID }}">{{ .Title }}</a></td>
+            <td>{{ .CreatedOn }}</td>
+            <td>{{ .ID }}</td>
+        </tr>
+        {{ end }}
+    </table>
+    {{ else }}
     <p>Some work is going on</p>
+    {{ end }}
 {{end}}

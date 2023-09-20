@@ -16,18 +16,29 @@ func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 		return
 	}
 
-	tmpls := []string{
+	tmplGsts, err := m.gists.Recent()
+	if err != nil {
+		m.serverErr(a, b, err)
+		return
+	}
+
+	tmplFiles := []string{
 		"./ui/html/baselayer.tmpl",
 		"./ui/html/partials/redirect.tmpl",
 		"./ui/html/pages/landing.tmpl",
 	}
 
-	ps, err := template.ParseFiles(tmpls...)
+	ps, err := template.ParseFiles(tmplFiles...)
 	if err != nil {
 		m.serverErr(a, b, err)
 		return
 	}
-	err = ps.ExecuteTemplate(a, "baselayer", nil)
+
+	tmplData := tmplData{
+		TmplGstList: tmplGsts,
+	}
+
+	err = ps.ExecuteTemplate(a, "baselayer", tmplData)
 	if err != nil {
 		//m.eLog.Print(err.Error())
 		m.serverErr(a, b, err)
