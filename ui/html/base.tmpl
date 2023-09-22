@@ -1,0 +1,24 @@
+{{define "base"}}
+<!doctype html>
+<html lang='en'>
+    <head>
+        <meta charset='utf-8'>
+        <title>{{template "title" .}} - Gist App</title>
+    </head>
+        <body>
+        <header>
+            <h1><a href='/'>Gist App</a></h1>
+        </header>
+        {{ template "redirect" .}}
+        <main>
+            {{template "main" .}}
+            {{block "additionalblockedbar" .}}
+                <p>Some default content</p>
+            {{end}}
+        </main>
+    </body>
+</html>
+
+<footer>Powered by <a href='https://golang.org/'>Go</a></footer>
+
+{{end}}

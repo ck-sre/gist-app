@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"gistapp.ck89.net/internal/dblayer"
-	"html/template"
 	"net/http"
 	"strconv"
 )
@@ -21,30 +20,33 @@ func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 		m.serverErr(a, b, err)
 		return
 	}
+	fmt.Printf("+v", tmplGsts)
 
-	tmplFiles := []string{
-		"./ui/html/baselayer.tmpl",
-		"./ui/html/partials/redirect.tmpl",
-		"./ui/html/pages/landing.tmpl",
-	}
+	m.render(a, b, http.StatusOK, "homebase.tmpl", tmplData{TmplGstList: tmplGsts})
 
-	ps, err := template.ParseFiles(tmplFiles...)
-	if err != nil {
-		m.serverErr(a, b, err)
-		return
-	}
-
-	tmplData := tmplData{
-		TmplGstList: tmplGsts,
-	}
-
-	err = ps.ExecuteTemplate(a, "baselayer", tmplData)
-	if err != nil {
-		//m.eLog.Print(err.Error())
-		m.serverErr(a, b, err)
-		//m.logger.Error(err.Error(), "method", b.Method, "uri", b.URL.RequestURI())
-		//http.Error(a, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-	}
+	//tmplFiles := []string{
+	//	"./ui/html/baselayer.tmpl",
+	//	"./ui/html/partials/redirect.tmpl",
+	//	"./ui/html/pages/landing.tmpl",
+	//}
+	//
+	//ps, err := template.ParseFiles(tmplFiles...)
+	//if err != nil {
+	//	m.serverErr(a, b, err)
+	//	return
+	//}
+	//
+	//tmplData := tmplData{
+	//	TmplGstList: tmplGsts,
+	//}
+	//
+	//err = ps.ExecuteTemplate(a, "baselayer", tmplData)
+	//if err != nil {
+	//	//m.eLog.Print(err.Error())
+	//	m.serverErr(a, b, err)
+	//	//m.logger.Error(err.Error(), "method", b.Method, "uri", b.URL.RequestURI())
+	//	//http.Error(a, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	//}
 }
 
 func (m *mission) gistWrite(a http.ResponseWriter, b *http.Request) {
@@ -88,33 +90,35 @@ func (m *mission) gistView(a http.ResponseWriter, b *http.Request) {
 		return
 	}
 
-	tmpls := []string{
-		"./ui/html/baselayer.tmpl",
-		"./ui/html/partials/redirect.tmpl",
-		"./ui/html/pages/viewlayer.tmpl",
-	}
+	m.render(a, b, http.StatusOK, "viewlayer.tmpl", tmplData{TmplGst: gst})
 
-	pt, err := template.ParseFiles(tmpls...)
-	if err != nil {
-		m.serverErr(a, b, err)
-		return
-	}
-
-	gstData := tmplData{
-		TmplGst: gst,
-	}
-
-	err = pt.ExecuteTemplate(a, "baselayer", gstData)
-	if err != nil {
-		m.serverErr(a, b, err)
-		return
-	}
-
-	a.Header().Set("Content-Type", "application/json")
-	a.Header().Set("Cache-Control", "public, max-age=12345600")
-	a.Header().Add("Cache-Control", "public")
-	a.Header().Add("Cache-Control", "max-age=12345600")
-	a.Header()["X-XSS-Protection"] = []string{"1; mode=block"}
+	//tmpls := []string{
+	//	"./ui/html/baselayer.tmpl",
+	//	"./ui/html/partials/redirect.tmpl",
+	//	"./ui/html/pages/viewlayer.tmpl",
+	//}
+	//
+	//pt, err := template.ParseFiles(tmpls...)
+	//if err != nil {
+	//	m.serverErr(a, b, err)
+	//	return
+	//}
+	//
+	//gstData := tmplData{
+	//	TmplGst: gst,
+	//}
+	//
+	//err = pt.ExecuteTemplate(a, "baselayer", gstData)
+	//if err != nil {
+	//	m.serverErr(a, b, err)
+	//	return
+	//}
+	//
+	//a.Header().Set("Content-Type", "application/json")
+	//a.Header().Set("Cache-Control", "public, max-age=12345600")
+	//a.Header().Add("Cache-Control", "public")
+	//a.Header().Add("Cache-Control", "max-age=12345600")
+	//a.Header()["X-XSS-Protection"] = []string{"1; mode=block"}
 	//a.Header().Del("Cache-Control")
 	//fmt.Println(a.Header().Values("Cache-Control"))
 	//a.Write([]byte(`{"ResponseKey": "This is a gist"}`))

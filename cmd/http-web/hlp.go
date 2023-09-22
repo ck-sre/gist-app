@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"runtime/debug"
 )
@@ -28,4 +29,19 @@ func (m *mission) clErr(w http.ResponseWriter, status int) {
 // For not found errors
 func (m *mission) noFound(w http.ResponseWriter) {
 	m.clErr(w, http.StatusNotFound)
+}
+
+func (m mission) render(w http.ResponseWriter, r *http.Request, status int, pagename string, tmplData tmplData) {
+
+	tc, ok := m.tmplCache[pagename]
+	if !ok {
+		err := fmt.Errorf("This template %s  does not exist", pagename)
+		m.serverErr(w, r, err)
+		return
+	}
+
+	w.WriteHeader(status)
+	if err := tc.ExecuteTemplate(w, "base", tmplData); err != nil {
+		m.serverErr(w, r, err)
+	}
 }

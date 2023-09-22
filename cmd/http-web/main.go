@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"gistapp.ck89.net/internal/dblayer"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
@@ -12,8 +13,9 @@ import (
 )
 
 type mission struct {
-	logger *slog.Logger
-	gists  *dblayer.Gistdblayer
+	logger    *slog.Logger
+	gists     *dblayer.Gistdblayer
+	tmplCache map[string]*template.Template
 	//DB    *sql.DB
 	//eLog *log.Logger
 	//iLog *log.Logger
@@ -34,7 +36,7 @@ func main() {
 	var cf cfg
 
 	flag.StringVar(&cf.port, "port", ":9100", "port to listen on")
-	flag.StringVar(&cf.dbconn, "dbconn", "gistuser:pwd/gistapp?parseTime=true", "connection string for mysql")
+	flag.StringVar(&cf.dbconn, "dbconn", "gistuser:pwd@(localhost:3306)/gistapp?parseTime=true", "connection string for mysql")
 	flag.Parse()
 
 	//Logging
@@ -48,9 +50,15 @@ func main() {
 
 	defer mysqlDB.Close()
 
+	tmplCache, err := newTmplCache()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 	msn := &mission{
-		logger: logger,
-		gists:  &dblayer.Gistdblayer{DB: mysqlDB},
+		logger:    logger,
+		gists:     &dblayer.Gistdblayer{DB: mysqlDB},
+		tmplCache: tmplCache,
 	}
 
 	customSvr := &http.Server{
