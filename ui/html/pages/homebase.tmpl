@@ -1,5 +1,5 @@
-{{ define "main"}}Landing{{end}}
-{{ define "base"}}
+{{ define "title"}}Landing{{end}}
+{{ define "main"}}
     <h2>Recent gist apps</h2>
 
     {{ if .TmplGstList }}
@@ -11,8 +11,8 @@
         </tr>
         {{ range .TmplGstList }}
         <tr>
-            <td><a href="/gists/{{ .ID }}">{{ .Title }}</a></td>
-            <td>{{ .CreatedOn }}</td>
+            <td><a href="/get/?gistid={{ .ID }}">{{ .Title }}</a></td>
+            <td>{{ fmtDate .CreatedOn }}</td>
             <td>{{ .ID }}</td>
         </tr>
         {{ end }}

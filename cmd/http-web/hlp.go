@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"time"
 )
 
 func (m *mission) serverErr(w http.ResponseWriter, b *http.Request, err error) {
@@ -40,8 +42,19 @@ func (m mission) render(w http.ResponseWriter, r *http.Request, status int, page
 		return
 	}
 
-	w.WriteHeader(status)
-	if err := tc.ExecuteTemplate(w, "base", tmplData); err != nil {
+	bf := new(bytes.Buffer)
+
+	if err := tc.ExecuteTemplate(bf, "base", tmplData); err != nil {
+
 		m.serverErr(w, r, err)
+		return
+	}
+	w.WriteHeader(status)
+	bf.WriteTo(w)
+}
+
+func (m mission) newTmplData(a *http.Request) tmplData {
+	return tmplData{
+		PresentYr: time.Now().Year(),
 	}
 }

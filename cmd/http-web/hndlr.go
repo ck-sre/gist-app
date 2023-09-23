@@ -20,33 +20,12 @@ func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 		m.serverErr(a, b, err)
 		return
 	}
-	fmt.Printf("+v", tmplGsts)
 
-	m.render(a, b, http.StatusOK, "homebase.tmpl", tmplData{TmplGstList: tmplGsts})
+	tmplData := m.newTmplData(b)
+	tmplData.TmplGstList = tmplGsts
 
-	//tmplFiles := []string{
-	//	"./ui/html/baselayer.tmpl",
-	//	"./ui/html/partials/redirect.tmpl",
-	//	"./ui/html/pages/landing.tmpl",
-	//}
-	//
-	//ps, err := template.ParseFiles(tmplFiles...)
-	//if err != nil {
-	//	m.serverErr(a, b, err)
-	//	return
-	//}
-	//
-	//tmplData := tmplData{
-	//	TmplGstList: tmplGsts,
-	//}
-	//
-	//err = ps.ExecuteTemplate(a, "baselayer", tmplData)
-	//if err != nil {
-	//	//m.eLog.Print(err.Error())
-	//	m.serverErr(a, b, err)
-	//	//m.logger.Error(err.Error(), "method", b.Method, "uri", b.URL.RequestURI())
-	//	//http.Error(a, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-	//}
+	m.render(a, b, http.StatusOK, "homebase.tmpl", tmplData)
+
 }
 
 func (m *mission) gistWrite(a http.ResponseWriter, b *http.Request) {
@@ -90,7 +69,10 @@ func (m *mission) gistView(a http.ResponseWriter, b *http.Request) {
 		return
 	}
 
-	m.render(a, b, http.StatusOK, "viewlayer.tmpl", tmplData{TmplGst: gst})
+	tmplData := m.newTmplData(b)
+	tmplData.TmplGst = gst
+
+	m.render(a, b, http.StatusOK, "viewlayer.tmpl", tmplData)
 
 	//tmpls := []string{
 	//	"./ui/html/baselayer.tmpl",

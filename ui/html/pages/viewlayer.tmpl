@@ -1,5 +1,5 @@
 {{ define "title"}}Gist #{{ .TmplGst.ID }}{{end}}
-{{ define "start"}}
+{{ define "main"}}
    {{ with .TmplGst }}
         <div class='gist'>
             <div class='metadata'>
@@ -8,8 +8,8 @@
             </div>
             <pre>{{ .Content }}</pre>
             <div class='metadata'>
-                <span>{{ .CreatedOn.Weekday }}</span>
-                <time>{{ .ExpiresOn.AddDate 0 1 0 }}</time>
+                <span>{{ fmtDate .CreatedOn.Weekday }}</span>
+                <time>{{ fmtDate .ExpiresOn.AddDate 0 1 0 }}</time>
             </div>
         </div>
     {{ end }}

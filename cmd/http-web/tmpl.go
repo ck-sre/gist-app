@@ -5,11 +5,21 @@ import (
 	"gistapp.ck89.net/internal/dblayer"
 	"html/template"
 	"path/filepath"
+	"time"
 )
 
 type tmplData struct {
+	PresentYr   int
 	TmplGstList []dblayer.Gist
 	TmplGst     dblayer.Gist
+}
+
+func fmtDate(tm time.Time) string {
+	return tm.Format("Jan 2, 2013 at 3:04pm (SGT)")
+}
+
+var fncs = template.FuncMap{
+	"fmtDate": fmtDate,
 }
 
 func newTmplCache() (map[string]*template.Template, error) {
@@ -21,47 +31,28 @@ func newTmplCache() (map[string]*template.Template, error) {
 		return nil, err
 	}
 
-	for _, leaf := range leaves {
+	for idx, leaf := range leaves {
 		fmt.Println(
-			"iteration 1",
+			"iteration ",
+			idx,
 			leaf,
 		)
 		leafName := filepath.Base(leaf)
-		fmt.Println(leafName)
-		//tmplFiles := []string{
-		//	"./ui/html/base.tmpl",
-		//	"./ui/html/partials/redirect.tmpl",
-		//	leaf,
-		//}
-		//
-		tc, err := template.ParseFiles("./ui/html/base.tmpl")
+		fmt.Println("leaf name is ", leafName)
+
+		tc, err := template.New(leafName).Funcs(fncs).ParseFiles("./ui/html/base.tmpl")
+
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(tc)
 
-		cache[leafName] = tc
-		fmt.Println("cache leafname", cache[leafName])
-		//leafName := filepath.Base(leaf)
-		//tc, err := template.ParseFiles("./ui/html/base.tmpl")
-		//
-		//if err != nil {
-		//	return nil, err
-		//}
-		//
 		tc, err = tc.ParseGlob("./ui/html/partials/*.tmpl")
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println("Run tc second")
-		fmt.Println(tc)
-		//
-		//tc, err = template.ParseFiles(leaf)
-		//if err != nil {
-		//	return nil, err
-		//}
-		//
+		tc, err = tc.ParseFiles(leaf)
 		cache[leafName] = tc
+		fmt.Println("cache leafname", cache[leafName].Name())
 	}
 
 	return cache, nil
