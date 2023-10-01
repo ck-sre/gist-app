@@ -16,15 +16,7 @@ type mission struct {
 	logger    *slog.Logger
 	gists     *dblayer.Gistdblayer
 	tmplCache map[string]*template.Template
-	//DB    *sql.DB
-	//eLog *log.Logger
-	//iLog *log.Logger
 }
-
-//
-//func (m *mission) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-//	writer.Write([]byte("This is my home page"))
-//}
 
 func main() {
 	//Initialize new servemux register landing as a handler
