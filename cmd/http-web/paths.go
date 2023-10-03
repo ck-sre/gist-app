@@ -14,5 +14,5 @@ func (msn *mission) paths() http.Handler {
 	mx.Handle("/get", http.HandlerFunc(msn.gistView))
 	mx.Handle("/recents", http.HandlerFunc(msn.gistRecents))
 
-	return msn.logRq(midHeaders(mx))
+	return msn.resurrectPanic(msn.logRq(midHeaders(mx)))
 }

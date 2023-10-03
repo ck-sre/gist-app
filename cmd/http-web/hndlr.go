@@ -15,6 +15,8 @@ func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 		return
 	}
 
+	//panic("this is a panic that's deliberate")
+
 	tmplGsts, err := m.gists.Recent()
 	if err != nil {
 		m.serverErr(a, b, err)

@@ -1,8 +1,11 @@
 package main
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
-func (msn *mission) logRq(next http.Handler) http.Handler {
+func (msn *mission) logRq(nxt http.Handler) http.Handler {
 	return http.HandlerFunc(func(a http.ResponseWriter, b *http.Request) {
 		var (
 			url     = b.URL.RequestURI()
@@ -11,11 +14,11 @@ func (msn *mission) logRq(next http.Handler) http.Handler {
 			proto   = b.Proto
 		)
 		msn.logger.Info("request", "url", url, "remoteAddr", remAddr, "method", mth, "proto", proto)
-		next.ServeHTTP(a, b)
+		nxt.ServeHTTP(a, b)
 	})
 }
 
-func midHeaders(next http.Handler) http.Handler {
+func midHeaders(nxt http.Handler) http.Handler {
 	return http.HandlerFunc(func(a http.ResponseWriter, b *http.Request) {
 		a.Header().Set("Content-Security-Policy", "default-src 'self'; style-src 'self'; font-src fonts.gstatic.com")
 		a.Header().Set("X-Frame-Options", "deny")
@@ -23,6 +26,18 @@ func midHeaders(next http.Handler) http.Handler {
 		a.Header().Set("X-Content-Type-Options", "nosniff")
 		a.Header().Set("Referrer-Policy", "origin-when-cross-origin")
 
-		next.ServeHTTP(a, b)
+		nxt.ServeHTTP(a, b)
+	})
+}
+
+func (msn *mission) resurrectPanic(nxt http.Handler) http.Handler {
+	return http.HandlerFunc(func(a http.ResponseWriter, b *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				a.Header().Set("Connection", "close")
+				msn.serverErr(a, b, fmt.Errorf("%v", err))
+			}
+		}()
+		nxt.ServeHTTP(a, b)
 	})
 }
