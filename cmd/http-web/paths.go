@@ -1,18 +1,26 @@
 package main
 
 import (
+	"github.com/julienschmidt/httprouter"
+	"github.com/justinas/alice"
 	"net/http"
 )
 
 func (msn *mission) paths() http.Handler {
-	mx := http.NewServeMux()
-	fs := http.FileServer(http.Dir("./ui/static/"))
-	mx.Handle("/static/", http.StripPrefix("/static", fs))
 
-	mx.Handle("/", http.HandlerFunc(msn.landing))
-	mx.Handle("/new", http.HandlerFunc(msn.gistWrite))
-	mx.Handle("/get", http.HandlerFunc(msn.gistView))
-	mx.Handle("/recents", http.HandlerFunc(msn.gistRecents))
+	rtr := httprouter.New()
 
-	return msn.resurrectPanic(msn.logRq(midHeaders(mx)))
+	fs := http.FileServer(http.Dir("./ui/static/"))true
+	rtr.Handler(http.MethodGet,"/static/", http.StripPrefix("/static", fs))
+
+	rtr.HandlerFunc(http.MethodGet, "/", msn.landing)
+	rtr.HandlerFunc(http.MethodPost, "/new", msn.gistWrite)
+	rtr.HandlerFunc(http.MethodPost, "/new", msn.gistWritePost)
+	rtr.HandlerFunc(http.MethodGet, "/get/:id", msn.gistView)
+
+
+	stdMid := alice.New(msn.resurrectPanic, msn.logRq, midHeaders)
+	return stdMid.Then(rtr)
+
+	//return msn.resurrectPanic(msn.logRq(midHeaders(mx)))
 }
