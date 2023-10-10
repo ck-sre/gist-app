@@ -1,0 +1,24 @@
+{{ define  "title"}}Writing out a new gist{{end}}
+
+{{define "main"}}
+    <form action="/gists/new" method="POST">
+        <div>
+            <label for="name">Title:</label>
+            <input type="text" name="name" id="title">
+        </div>
+        <div>
+            <label for="content">Content</label>
+            <textarea name="content" id="content" cols="30" rows="10"></textarea>
+        </div>
+        <div>
+            <label> Expires in:</label>
+            <input type="radio" name="expires" value="365"> 1 Year
+            <input type="radio" name="expires" value="30"> 1 Month
+            <input type="radio" name="expires" value="7"> 1 Week
+            <input type="radio" name="expires" value="1" checked> 1 Day
+        </div>
+        <div>
+            <input type="submit" value="Create">
+        </div>
+    </form>
+{{end}}

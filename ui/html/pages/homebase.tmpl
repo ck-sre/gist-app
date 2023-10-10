@@ -11,9 +11,9 @@
         </tr>
         {{ range .TmplGstList }}
         <tr>
-            <td><a href="/get?gistid={{ .ID }}">{{ .Title }}</a></td>
+            <td><a href="/get/{{ .ID }}">{{ .Title }}</a></td>
             <td>{{ fmtDate .CreatedOn }}</td>
-            <td>{{ .ID }}</td>
+            <td>#{{ .ID }}</td>
         </tr>
         {{ end }}
     </table>
