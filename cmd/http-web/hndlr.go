@@ -34,9 +34,20 @@ func (m *mission) gistWrite(a http.ResponseWriter, b *http.Request) {
 
 func (m *mission) gistWriteNote(a http.ResponseWriter, b *http.Request) {
 
-	title := "No suspension"
-	content := "Noone wants a suspension when a new gist is created, its for the help of humanity"
-	expires := 7
+	b.Body = http.MaxBytesReader(a, b.Body, 4096)
+	err := b.ParseForm()
+	if err != nil {
+		m.clErr(a, http.StatusBadRequest)
+		return
+	}
+
+	title := b.PostForm.Get("title")
+	content := b.PostForm.Get("content")
+	expires, err := strconv.Atoi(b.PostForm.Get("expires"))
+	if err != nil {
+		m.clErr(a, http.StatusBadRequest)
+		return
+	}
 
 	gistid, err := m.gists.Add(title, content, expires)
 	if err != nil {
@@ -44,8 +55,8 @@ func (m *mission) gistWriteNote(a http.ResponseWriter, b *http.Request) {
 		return
 	}
 
-	http.Redirect(a, b, fmt.Sprintf("/get?gistid=%d", gistid), http.StatusSeeOther)
-
+	http.Redirect(a, b, fmt.Sprintf("/get/%d", gistid), http.StatusSeeOther)
+	//g
 	//a.Write([]byte(`{"Response": "Here's a new gist we're writing"}`))
 
 }
