@@ -7,6 +7,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 )
 
 // landing function gives byte slice as a response body
@@ -43,9 +45,30 @@ func (m *mission) gistWriteNote(a http.ResponseWriter, b *http.Request) {
 
 	title := b.PostForm.Get("title")
 	content := b.PostForm.Get("content")
+
 	expires, err := strconv.Atoi(b.PostForm.Get("expires"))
 	if err != nil {
 		m.clErr(a, http.StatusBadRequest)
+		return
+	}
+
+	fErr := make(map[string]string)
+	if strings.TrimSpace(title) == "" {
+		fErr["title"] = "This field cannot be blank"
+	} else if utf8.RuneCountInString(title) > 100 {
+		fErr["title"] = "This field cannot be more than 100 characters"
+	}
+
+	if strings.TrimSpace(content) == "" {
+		fErr["content"] = "This field cannot be blank"
+	}
+
+	if expires < 1 || expires > 365 {
+		fErr["expires"] = "This field must be a number between 1 and 365"
+	}
+
+	if len(fErr) > 0 {
+		fmt.Fprintf(a, "%v", fErr)
 		return
 	}
 
