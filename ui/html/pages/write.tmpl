@@ -4,27 +4,27 @@
     <form action="/new" method="POST">
         <div>
             <label>Title:</label>
-            {{ with .Form.FieldErrors.Title}}
+            {{ with .Form.AttrErrors.Title}}
                 <label class="error">{{.}}</label>
             {{end}}
             <input type="text" name="name" id="{{ .Form.Title }}">
         </div>
         <div>
             <label>Content</label>
-            {{ with .Form.FieldErrors.Content}}
+            {{ with .Form.AttrErrors.Content}}
                 <label class="error">{{.}}</label>
             {{end}}
             <textarea name="content" id="content" cols="30" rows="10">{{ .Form.Content }}</textarea>
         </div>
         <div>
             <label> Expires in:</label>
-            {{ with .Form.FieldErrors.Expires}}
+            {{ with .Form.AttrErrors.Expires}}
                 <label class="error">{{.}}</label>
             {{end}}
-            <input type="radio" name="expires" value="365"> 1 Year {{ if eq .Form.Expires "365" }} checked {{end}}
-            <input type="radio" name="expires" value="30"> 1 Month {{ if eq .Form.Expires "30" }} checked {{end}}
-            <input type="radio" name="expires" value="7"> 1 Week {{ if eq .Form.Expires "7" }} checked {{end}}
-            <input type="radio" name="expires" value="1" checked> 1 Day {{ if eq .Form.Expires "1" }} checked {{end}}
+            <input type="radio" name="expires" value="365"> 1 Year {{ if eq .Form.Expires 365 }} checked {{end}}
+            <input type="radio" name="expires" value="30"> 1 Month {{ if eq .Form.Expires 30 }} checked {{end}}
+            <input type="radio" name="expires" value="7"> 1 Week {{ if eq .Form.Expires 7 }} checked {{end}}
+            <input type="radio" name="expires" value="1" checked> 1 Day {{ if eq .Form.Expires 1 }} checked {{end}}
         </div>
         <div>
             <input type="submit" value="Create Gist">

@@ -3,24 +3,23 @@ package main
 import (
 	"errors"
 	"fmt"
+	"gistapp.ck89.net/internal/checker"
 	"gistapp.ck89.net/internal/dblayer"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
-	"strings"
-	"unicode/utf8"
 )
 
 type gistWriteForm struct {
-	Title      string
-	Content    string
-	Expires    int
-	AttrErrors map[string]string
+	Title   string
+	Content string
+	Expires int
+	//AttrErrors map[string]string
+	checker.Checker
 }
 
 // landing function gives byte slice as a response body
 func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
-	//panic("this is a panic that's deliberate")
 
 	tmplGsts, err := m.gists.Recent()
 	if err != nil {
@@ -63,28 +62,17 @@ func (m *mission) gistWriteNote(a http.ResponseWriter, b *http.Request) {
 	}
 
 	form := gistWriteForm{
-		Title:      b.PostForm.Get("title"),
-		Content:    b.PostForm.Get("content"),
-		Expires:    expires,
-		AttrErrors: make(map[string]string),
+		Title:   b.PostForm.Get("title"),
+		Content: b.PostForm.Get("content"),
+		Expires: expires,
 	}
 
-	//fErr := make(map[string]string)
-	if strings.TrimSpace(form.Title) == "" {
-		form.AttrErrors["title"] = "This≤ field cannot be blank"
-	} else if utf8.RuneCountInString(form.Title) > 100 {
-		form.AttrErrors["title"] = "This field cannot be more than 100 characters"
-	}
+	form.CheckAttr(checker.NotEmpty(form.Title), "title", "This field cannot be blank")
+	form.CheckAttr(checker.LimitChars(form.Title, 100), "title", "This field cannot be more than 100 characters")
+	form.CheckAttr(checker.NotEmpty(form.Content), "content", "This field cannot be blank")
+	form.CheckAttr(checker.AllowedVal(form.Expires, 1, 365), "expires", "This field must be a number between 1 and 365")
 
-	if strings.TrimSpace(form.Content) == "" {
-		form.AttrErrors["content"] = "This field cannot be blank"
-	}
-
-	if form.Expires < 1 || expires > 365 {
-		form.AttrErrors["expires"] = "This field must be a number between 1 and 365"
-	}
-
-	if len(form.AttrErrors) > 0 {
+	if !form.CheckPassed() {
 		gstData := m.newTmplData(b)
 		gstData.Form = form
 		m.render(a, b, http.StatusBadRequest, "write.tmpl", gstData)
@@ -98,8 +86,6 @@ func (m *mission) gistWriteNote(a http.ResponseWriter, b *http.Request) {
 	}
 
 	http.Redirect(a, b, fmt.Sprintf("/get/%d", gistid), http.StatusSeeOther)
-	//g
-	//a.Write([]byte(`{"Response": "Here's a new gist we're writing"}`))
 
 }
 
