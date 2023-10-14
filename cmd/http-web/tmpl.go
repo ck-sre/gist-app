@@ -12,6 +12,7 @@ type tmplData struct {
 	PresentYr   int
 	TmplGstList []dblayer.Gist
 	TmplGst     dblayer.Gist
+	Form        any
 }
 
 func fmtDate(tm time.Time) string {

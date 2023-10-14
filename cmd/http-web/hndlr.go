@@ -11,6 +11,13 @@ import (
 	"unicode/utf8"
 )
 
+type gistWriteForm struct {
+	Title      string
+	Content    string
+	Expires    int
+	AttrErrors map[string]string
+}
+
 // landing function gives byte slice as a response body
 func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 	//panic("this is a panic that's deliberate")
@@ -30,6 +37,9 @@ func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 
 func (m *mission) gistWrite(a http.ResponseWriter, b *http.Request) {
 	gstData := m.newTmplData(b)
+	gstData.Form = gistWriteForm{
+		Expires: 365,
+	}
 	m.render(a, b, http.StatusOK, "write.tmpl", gstData)
 
 }
@@ -43,8 +53,8 @@ func (m *mission) gistWriteNote(a http.ResponseWriter, b *http.Request) {
 		return
 	}
 
-	title := b.PostForm.Get("title")
-	content := b.PostForm.Get("content")
+	//title := b.PostForm.Get("title")
+	//content := b.PostForm.Get("content")
 
 	expires, err := strconv.Atoi(b.PostForm.Get("expires"))
 	if err != nil {
@@ -52,27 +62,36 @@ func (m *mission) gistWriteNote(a http.ResponseWriter, b *http.Request) {
 		return
 	}
 
-	fErr := make(map[string]string)
-	if strings.TrimSpace(title) == "" {
-		fErr["title"] = "This field cannot be blank"
-	} else if utf8.RuneCountInString(title) > 100 {
-		fErr["title"] = "This field cannot be more than 100 characters"
+	form := gistWriteForm{
+		Title:      b.PostForm.Get("title"),
+		Content:    b.PostForm.Get("content"),
+		Expires:    expires,
+		AttrErrors: make(map[string]string),
 	}
 
-	if strings.TrimSpace(content) == "" {
-		fErr["content"] = "This field cannot be blank"
+	//fErr := make(map[string]string)
+	if strings.TrimSpace(form.Title) == "" {
+		form.AttrErrors["title"] = "This≤ field cannot be blank"
+	} else if utf8.RuneCountInString(form.Title) > 100 {
+		form.AttrErrors["title"] = "This field cannot be more than 100 characters"
 	}
 
-	if expires < 1 || expires > 365 {
-		fErr["expires"] = "This field must be a number between 1 and 365"
+	if strings.TrimSpace(form.Content) == "" {
+		form.AttrErrors["content"] = "This field cannot be blank"
 	}
 
-	if len(fErr) > 0 {
-		fmt.Fprintf(a, "%v", fErr)
+	if form.Expires < 1 || expires > 365 {
+		form.AttrErrors["expires"] = "This field must be a number between 1 and 365"
+	}
+
+	if len(form.AttrErrors) > 0 {
+		gstData := m.newTmplData(b)
+		gstData.Form = form
+		m.render(a, b, http.StatusBadRequest, "write.tmpl", gstData)
 		return
 	}
 
-	gistid, err := m.gists.Add(title, content, expires)
+	gistid, err := m.gists.Add(form.Title, form.Content, form.Expires)
 	if err != nil {
 		m.serverErr(a, b, err)
 		return
