@@ -10,13 +10,19 @@ func (msn *mission) paths() http.Handler {
 
 	rtr := httprouter.New()
 
-	fs := http.FileServer(http.Dir("./ui/static/"))
-	rtr.Handler(http.MethodGet, "/static/", http.StripPrefix("/static", fs))
+	rtr.NotFound = http.HandlerFunc(func(a http.ResponseWriter, b *http.Request) {
+		msn.noFound(a)
+	})
 
-	rtr.HandlerFunc(http.MethodGet, "/", msn.landing)
-	rtr.HandlerFunc(http.MethodGet, "/new", msn.gistWrite)
-	rtr.HandlerFunc(http.MethodPost, "/new", msn.gistWriteNote)
-	rtr.HandlerFunc(http.MethodGet, "/get/:id", msn.gistView)
+	fs := http.FileServer(http.Dir("./ui/static/"))
+	rtr.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static", fs))
+
+	dyn := alice.New(msn.snMgr.LoadAndSave)
+
+	rtr.Handler(http.MethodGet, "/", dyn.ThenFunc(msn.landing))
+	rtr.Handler(http.MethodGet, "/new", dyn.ThenFunc(msn.gistWrite))
+	rtr.Handler(http.MethodPost, "/new", dyn.ThenFunc(msn.gistWriteNote))
+	rtr.Handler(http.MethodGet, "/get/:id", dyn.ThenFunc(msn.gistView))
 
 	stdMid := alice.New(msn.resurrectPanic, msn.logRq, midHeaders)
 	return stdMid.Then(rtr)

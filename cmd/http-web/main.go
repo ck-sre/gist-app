@@ -4,11 +4,14 @@ import (
 	"database/sql"
 	"flag"
 	"gistapp.ck89.net/internal/dblayer"
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -18,6 +21,7 @@ type mission struct {
 	gists     *dblayer.Gistdblayer
 	tmplCache map[string]*template.Template
 	formDcdr  *form.Decoder
+	snMgr     *scs.SessionManager
 }
 
 func main() {
@@ -52,11 +56,16 @@ func main() {
 
 	formDcdr := form.NewDecoder()
 
+	snMgr := scs.New()
+	snMgr.Store = mysqlstore.New(mysqlDB)
+	snMgr.Lifetime = 12 * time.Hour
+
 	msn := &mission{
 		logger:    logger,
 		gists:     &dblayer.Gistdblayer{DB: mysqlDB},
 		tmplCache: tmplCache,
 		formDcdr:  formDcdr,
+		snMgr:     snMgr,
 	}
 
 	customSvr := &http.Server{
