@@ -11,11 +11,11 @@ import (
 )
 
 type gistWriteForm struct {
-	Title   string
-	Content string
-	Expires int
+	Title   string `form:"title"`
+	Content string `form:"content"`
+	Expires int    `form:"expires"`
 	//AttrErrors map[string]string
-	checker.Checker
+	checker.Checker `form:"-"` //ignore this field during decoding
 }
 
 // landing function gives byte slice as a response body
@@ -46,25 +46,12 @@ func (m *mission) gistWrite(a http.ResponseWriter, b *http.Request) {
 func (m *mission) gistWriteNote(a http.ResponseWriter, b *http.Request) {
 
 	b.Body = http.MaxBytesReader(a, b.Body, 4096)
-	err := b.ParseForm()
+
+	var form gistWriteForm
+	err := m.dcdPostForm(b, &form)
 	if err != nil {
 		m.clErr(a, http.StatusBadRequest)
 		return
-	}
-
-	//title := b.PostForm.Get("title")
-	//content := b.PostForm.Get("content")
-
-	expires, err := strconv.Atoi(b.PostForm.Get("expires"))
-	if err != nil {
-		m.clErr(a, http.StatusBadRequest)
-		return
-	}
-
-	form := gistWriteForm{
-		Title:   b.PostForm.Get("title"),
-		Content: b.PostForm.Get("content"),
-		Expires: expires,
 	}
 
 	form.CheckAttr(checker.NotEmpty(form.Title), "title", "This field cannot be blank")

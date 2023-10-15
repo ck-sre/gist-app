@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"gistapp.ck89.net/internal/dblayer"
+	"github.com/go-playground/form/v4"
 	"html/template"
 	"log/slog"
 	"net/http"
@@ -16,6 +17,7 @@ type mission struct {
 	logger    *slog.Logger
 	gists     *dblayer.Gistdblayer
 	tmplCache map[string]*template.Template
+	formDcdr  *form.Decoder
 }
 
 func main() {
@@ -47,10 +49,14 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
+
+	formDcdr := form.NewDecoder()
+
 	msn := &mission{
 		logger:    logger,
 		gists:     &dblayer.Gistdblayer{DB: mysqlDB},
 		tmplCache: tmplCache,
+		formDcdr:  formDcdr,
 	}
 
 	customSvr := &http.Server{

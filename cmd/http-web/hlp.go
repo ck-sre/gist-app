@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"github.com/go-playground/form/v4"
 	"net/http"
 	"runtime/debug"
 	"time"
@@ -57,4 +59,21 @@ func (m mission) newTmplData(a *http.Request) tmplData {
 	return tmplData{
 		PresentYr: time.Now().Year(),
 	}
+}
+
+func (m *mission) dcdPostForm(a *http.Request, destination any) error {
+
+	err := a.ParseForm()
+	if err != nil {
+		return err
+	}
+
+	err = m.formDcdr.Decode(destination, a.PostForm)
+
+	var errDcdr *form.InvalidDecoderError
+	if errors.As(err, &errDcdr) {
+		panic(err)
+	}
+
+	return nil
 }
