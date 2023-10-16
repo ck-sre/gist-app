@@ -72,6 +72,8 @@ func (m *mission) gistWriteNote(a http.ResponseWriter, b *http.Request) {
 		return
 	}
 
+	m.snMgr.Put(b.Context(), "blink", "Your gist has been saved successfully!")
+
 	http.Redirect(a, b, fmt.Sprintf("/get/%d", gistid), http.StatusSeeOther)
 
 }

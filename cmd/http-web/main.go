@@ -69,9 +69,9 @@ func main() {
 	}
 
 	customSvr := &http.Server{
-		Addr: cf.port,
-		//ErrorLog: logErr,
-		Handler: msn.paths(),
+		Addr:     cf.port,
+		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		Handler:  msn.paths(),
 	}
 
 	logger.Info("Listening on", slog.Any("port", cf.port))

@@ -14,6 +14,9 @@
         </header>
         {{ template "redirect" .}}
         <main>
+            {{ with .Blink}}
+            <div class='blink'>{{.}}</div>
+            {{end}}
             {{template "main" .}}
         </main>
         <footer>

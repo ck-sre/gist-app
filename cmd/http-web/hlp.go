@@ -51,6 +51,7 @@ func (m mission) render(w http.ResponseWriter, r *http.Request, status int, page
 		m.serverErr(w, r, err)
 		return
 	}
+
 	w.WriteHeader(status)
 	bf.WriteTo(w)
 }
@@ -58,6 +59,7 @@ func (m mission) render(w http.ResponseWriter, r *http.Request, status int, page
 func (m mission) newTmplData(a *http.Request) tmplData {
 	return tmplData{
 		PresentYr: time.Now().Year(),
+		Blink:     m.snMgr.PopString(a.Context(), "blink"),
 	}
 }
 

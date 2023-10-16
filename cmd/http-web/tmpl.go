@@ -13,6 +13,7 @@ type tmplData struct {
 	TmplGstList []dblayer.Gist
 	TmplGst     dblayer.Gist
 	Form        any
+	Blink       string
 }
 
 func fmtDate(tm time.Time) string {
