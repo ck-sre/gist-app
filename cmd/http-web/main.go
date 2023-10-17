@@ -59,6 +59,7 @@ func main() {
 	snMgr := scs.New()
 	snMgr.Store = mysqlstore.New(mysqlDB)
 	snMgr.Lifetime = 12 * time.Hour
+	snMgr.Cookie.Secure = true
 
 	msn := &mission{
 		logger:    logger,
@@ -75,7 +76,7 @@ func main() {
 	}
 
 	logger.Info("Listening on", slog.Any("port", cf.port))
-	err = customSvr.ListenAndServe()
+	err = customSvr.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	logger.Error(err.Error())
 	os.Exit(1)
 }

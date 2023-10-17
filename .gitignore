@@ -26,3 +26,6 @@ gistapp.ck89.net
 #No idea files
 .idea/*
 .idea
+
+# No tls
+tls
