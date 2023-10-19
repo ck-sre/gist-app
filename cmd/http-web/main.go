@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"gistapp.ck89.net/internal/dblayer"
@@ -69,10 +70,30 @@ func main() {
 		snMgr:     snMgr,
 	}
 
+	tlsCfg := &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.CurveP256, tls.X25519},
+		MinVersion:       tls.VersionTLS12,
+		MaxVersion:       tls.VersionTLS12,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, //nolint:staticcheck
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,   //nolint:staticcheck
+			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,  //nolint:staticcheck
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,    //nolint:staticcheck
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, //nolint:staticcheck
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,   //nolint:staticcheck
+
+		},
+	}
+
 	customSvr := &http.Server{
-		Addr:     cf.port,
-		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
-		Handler:  msn.paths(),
+		Addr:           cf.port,
+		ErrorLog:       slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		Handler:        msn.paths(),
+		TLSConfig:      tlsCfg,
+		IdleTimeout:    time.Minute,
+		ReadTimeout:    5 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 524288,
 	}
 
 	logger.Info("Listening on", slog.Any("port", cf.port))

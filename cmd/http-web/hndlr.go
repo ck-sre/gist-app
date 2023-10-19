@@ -127,3 +127,24 @@ func (m *mission) gistRecents(a http.ResponseWriter, b *http.Request) {
 	fmt.Fprintf(a, "+%v", gsts)
 
 }
+
+func (m *mission) usrRegister(a http.ResponseWriter, b *http.Request) {
+	fmt.Fprintf(a, "This is a user registration form")
+}
+
+func (m *mission) usrRegPost(a http.ResponseWriter, b *http.Request) {
+	fmt.Fprintf(a, "This is a user registration creation")
+}
+
+func (m *mission) usrLogin(a http.ResponseWriter, b *http.Request) {
+	fmt.Fprintf(a, "This is a user login form")
+
+}
+
+func (m *mission) usrLoginPost(a http.ResponseWriter, b *http.Request) {
+	fmt.Fprintf(a, "This is a user login creation")
+}
+
+func (m *mission) usrSignout(a http.ResponseWriter, b *http.Request) {
+	fmt.Fprintf(a, "This is a user signout")
+}
