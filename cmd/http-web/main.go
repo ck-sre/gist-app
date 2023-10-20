@@ -23,6 +23,7 @@ type mission struct {
 	tmplCache map[string]*template.Template
 	formDcdr  *form.Decoder
 	snMgr     *scs.SessionManager
+	usrs      *dblayer.UserLayer
 }
 
 func main() {
@@ -68,6 +69,7 @@ func main() {
 		tmplCache: tmplCache,
 		formDcdr:  formDcdr,
 		snMgr:     snMgr,
+		usrs:      &dblayer.UserLayer{MysqlDB: mysqlDB},
 	}
 
 	tlsCfg := &tls.Config{
