@@ -1,10 +1,13 @@
 package checker
 
 import (
+	"regexp"
 	"slices"
 	"strings"
 	"unicode/utf8"
 )
+
+var EmailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 
 type Checker struct {
 	AttrErrors map[string]string
@@ -40,4 +43,12 @@ func LimitChars(val string, limit int) bool {
 
 func AllowedVal[U comparable](val U, allowedVals ...U) bool {
 	return slices.Contains(allowedVals, val)
+}
+
+func CharMin(val string, min int) bool {
+	return utf8.RuneCountInString(val) >= min
+}
+
+func StringMatches(val string, regex *regexp.Regexp) bool {
+	return regex.MatchString(val)
 }

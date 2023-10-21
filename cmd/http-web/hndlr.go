@@ -18,6 +18,13 @@ type gistWriteForm struct {
 	checker.Checker `form:"-"` //ignore this field during decoding
 }
 
+type usrRegisterForm struct {
+	Name            string `form:"name"`
+	Email           string `form:"email"`
+	Password        string `form:"password"`
+	checker.Checker `form:"-"`
+}
+
 // landing function gives byte slice as a response body
 func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 
@@ -129,11 +136,50 @@ func (m *mission) gistRecents(a http.ResponseWriter, b *http.Request) {
 }
 
 func (m *mission) usrRegister(a http.ResponseWriter, b *http.Request) {
-	fmt.Fprintf(a, "This is a user registration form")
+	tmplData := m.newTmplData(b)
+	tmplData.Form = usrRegisterForm{}
+	m.render(a, b, http.StatusOK, "registeruser.tmpl", tmplData)
 }
 
 func (m *mission) usrRegPost(a http.ResponseWriter, b *http.Request) {
-	fmt.Fprintf(a, "This is a user registration creation")
+	var form usrRegisterForm
+
+	err := m.dcdPostForm(b, &form)
+	if err != nil {
+		m.clErr(a, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckAttr(checker.NotEmpty(form.Name), "name", "This field cannot be blank")
+	form.CheckAttr(checker.NotEmpty(form.Name), "email", "This field cannot be blank")
+	form.CheckAttr(checker.StringMatches(form.Email, checker.EmailRegex), "email", "This field must be a valid email address")
+	form.CheckAttr(checker.NotEmpty(form.Name), "password", "This field cannot be blank")
+	form.CheckAttr(checker.CharMin(form.Password, 8), "password", "This field must be at least 8 characters long")
+
+	if !form.CheckPassed() {
+		tmplData := m.newTmplData(b)
+		tmplData.Form = form
+		m.render(a, b, http.StatusUnprocessableEntity, "registeruser.tmpl", tmplData)
+		return
+	}
+
+	err = m.usrs.Add(form.Name, form.Email, form.Password)
+	if err != nil {
+		if errors.Is(err, dblayer.ErrDuplicateEmail) {
+			form.AddAttrError("email", "This email address is already in use")
+			tmplData := m.newTmplData(b)
+			tmplData.Form = form
+			m.render(a, b, http.StatusUnprocessableEntity, "registeruser.tmpl", tmplData)
+		} else {
+			m.serverErr(a, b, err)
+		}
+		return
+	}
+
+	m.snMgr.Put(b.Context(), "blink", "Your registration was successful. Please log in.")
+
+	http.Redirect(a, b, "/user/login", http.StatusSeeOther)
+
 }
 
 func (m *mission) usrLogin(a http.ResponseWriter, b *http.Request) {

@@ -79,3 +79,7 @@ func (m *mission) dcdPostForm(a *http.Request, destination any) error {
 
 	return nil
 }
+
+//func (m *mission) validAuthn(a *http.Request) bool {
+//	return m.snMgr.Exists(a.Context(), "authn")
+//}

@@ -2,6 +2,10 @@ package dblayer
 
 import (
 	"database/sql"
+	"errors"
+	"github.com/go-sql-driver/mysql"
+	"golang.org/x/crypto/bcrypt"
+	"strings"
 	"time"
 )
 
@@ -18,6 +22,25 @@ type UserLayer struct {
 }
 
 func (m *UserLayer) Add(name, email, password string) error {
+	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+	if err != nil {
+		return err
+	}
+
+	statement := `INSERT INTO users (name, email, hashed_password, created) VALUES (?, ?, ?, UTC_TIMESTAMP())`
+
+	_, err = m.MysqlDB.Exec(statement, name, email, hashedPwd)
+	if err != nil {
+		var dbError *mysql.MySQLError
+		if errors.As(err, &dbError) {
+			if dbError.Number == 1062 && strings.Contains(dbError.Message, "users_uc_email") {
+				return ErrDuplicateEmail
+			}
+		}
+		return err
+	}
+
 	return nil
 }
 
