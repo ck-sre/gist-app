@@ -10,11 +10,16 @@ import (
 var EmailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 
 type Checker struct {
-	AttrErrors map[string]string
+	AttrErrors    map[string]string
+	NonAttrErrors []string
 }
 
 func (c *Checker) CheckPassed() bool {
-	return len(c.AttrErrors) == 0
+	return len(c.AttrErrors) == 0 && len(c.NonAttrErrors) == 0
+}
+
+func (c *Checker) AddNonAttrErrors(msg string) {
+	c.NonAttrErrors = append(c.NonAttrErrors, msg)
 }
 
 func (c *Checker) AddAttrError(attr, msg string) {

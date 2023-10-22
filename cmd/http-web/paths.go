@@ -26,8 +26,8 @@ func (msn *mission) paths() http.Handler {
 
 	rtr.Handler(http.MethodGet, "/usr/register", dyn.ThenFunc(msn.usrRegister))
 	rtr.Handler(http.MethodPost, "/usr/register", dyn.ThenFunc(msn.usrRegPost))
-	rtr.Handler(http.MethodGet, "/usr/login", dyn.ThenFunc(msn.usrLogin))
-	rtr.Handler(http.MethodPost, "/usr/login", dyn.ThenFunc(msn.usrLoginPost))
+	rtr.Handler(http.MethodGet, "/usr/signin", dyn.ThenFunc(msn.usrSignin))
+	rtr.Handler(http.MethodPost, "/usr/signin", dyn.ThenFunc(msn.usrSigninPost))
 	rtr.Handler(http.MethodGet, "/usr/signout", dyn.ThenFunc(msn.usrSignout))
 	stdMid := alice.New(msn.resurrectPanic, msn.logRq, midHeaders)
 	return stdMid.Then(rtr)

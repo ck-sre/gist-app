@@ -44,8 +44,29 @@ func (m *UserLayer) Add(name, email, password string) error {
 	return nil
 }
 
-func (m *UserLayer) Auth(email, password string) (int, error) {
-	return 0, nil
+func (m *UserLayer) Authn(email, password string) (int, error) {
+	var id int
+	var hashedPwd []byte
+	stmt := "SELECT id, hashed_password FROM users WHERE email = ?"
+	err := m.MysqlDB.QueryRow(stmt, email).Scan(&id, &hashedPwd)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, ErrInvalidCredentials
+		} else {
+			return 0, err
+		}
+	}
+
+	err = bcrypt.CompareHashAndPassword(hashedPwd, []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return 0, ErrInvalidCredentials
+		} else {
+			return 0, err
+		}
+	}
+
+	return id, nil
 }
 
 func (m *UserLayer) CheckExists(id int) (bool, error) {

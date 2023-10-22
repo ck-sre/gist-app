@@ -1,0 +1,25 @@
+{{define "title"}} Signin {{end}}
+{{define "main"}}
+<form action='/usr/signin' method='POST' novalidate>
+    {{range .Form.NonAttrErrors}}
+        <div class='error'>{{.}}</div>
+    {{end}}
+    <div>
+        <label>Email:</label>
+        {{with .Form.AttrErrors.email}}
+            <label class='error'>{{.}}</label>
+        {{end}}
+        <input type='email' name='email' value='{{.Form.Email}}' />
+    </div>
+    <div>
+        <label>Password:</label>
+        {{with .Form.AttrErrors.password}}
+            <label class='error'>{{.}}</label>
+        {{end}}
+        <input type='password' name='password'/>
+    </div>
+    <div>
+        <input type='submit' value='Signin'/>
+    </div>
+</form>
+{{end}}

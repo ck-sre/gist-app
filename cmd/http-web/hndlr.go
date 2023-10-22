@@ -25,6 +25,12 @@ type usrRegisterForm struct {
 	checker.Checker `form:"-"`
 }
 
+type usrSigninForm struct {
+	Email           string `form:"email"`
+	Password        string `form:"password"`
+	checker.Checker `form:"-"`
+}
+
 // landing function gives byte slice as a response body
 func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 
@@ -178,17 +184,63 @@ func (m *mission) usrRegPost(a http.ResponseWriter, b *http.Request) {
 
 	m.snMgr.Put(b.Context(), "blink", "Your registration was successful. Please log in.")
 
-	http.Redirect(a, b, "/user/login", http.StatusSeeOther)
+	http.Redirect(a, b, "/usr/signin", http.StatusSeeOther)
 
 }
 
-func (m *mission) usrLogin(a http.ResponseWriter, b *http.Request) {
-	fmt.Fprintf(a, "This is a user login form")
+func (m *mission) usrSignin(a http.ResponseWriter, b *http.Request) {
+	tmplData := m.newTmplData(b)
+	tmplData.Form = usrSigninForm{}
+	m.render(a, b, http.StatusOK, "signin.tmpl", tmplData)
+
+	fmt.Fprintf(a, "This is a user signin form")
 
 }
 
-func (m *mission) usrLoginPost(a http.ResponseWriter, b *http.Request) {
-	fmt.Fprintf(a, "This is a user login creation")
+func (m *mission) usrSigninPost(a http.ResponseWriter, b *http.Request) {
+
+	var form usrSigninForm
+
+	err := m.dcdPostForm(b, &form)
+	if err != nil {
+		m.clErr(a, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckAttr(checker.NotEmpty(form.Email), "email", "This field cannot be blank")
+	form.CheckAttr(checker.StringMatches(form.Email, checker.EmailRegex), "email", "This field must be a valid email address")
+	form.CheckAttr(checker.NotEmpty(form.Password), "password", "This field cannot be blank")
+
+	if !form.CheckPassed() {
+		tmplData := m.newTmplData(b)
+		tmplData.Form = form
+		m.render(a, b, http.StatusUnprocessableEntity, "signin.tmpl", tmplData)
+		return
+	}
+
+	id, err := m.usrs.Authn(form.Email, form.Password)
+	if err != nil {
+		if errors.Is(err, dblayer.ErrInvalidCredentials) {
+			form.AddNonAttrErrors("Invalid credentials")
+			tmplData := m.newTmplData(b)
+			tmplData.Form = form
+			m.render(a, b, http.StatusUnprocessableEntity, "signin.tmpl", tmplData)
+		} else {
+			m.serverErr(a, b, err)
+		}
+		return
+	}
+
+	err = m.snMgr.RenewToken(b.Context())
+	if err != nil {
+		m.serverErr(a, b, err)
+		return
+	}
+
+	m.snMgr.Put(b.Context(), "authnUserID", id)
+
+	fmt.Fprintf(a, "This is a user signin creation")
+	http.Redirect(a, b, "/new", http.StatusSeeOther)
 }
 
 func (m *mission) usrSignout(a http.ResponseWriter, b *http.Request) {
