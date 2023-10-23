@@ -243,6 +243,13 @@ func (m *mission) usrSigninPost(a http.ResponseWriter, b *http.Request) {
 	http.Redirect(a, b, "/new", http.StatusSeeOther)
 }
 
-func (m *mission) usrSignout(a http.ResponseWriter, b *http.Request) {
-	fmt.Fprintf(a, "This is a user signout")
+func (m *mission) usrSignoutPost(a http.ResponseWriter, b *http.Request) {
+	err := m.snMgr.RenewToken(b.Context())
+	if err != nil {
+		m.serverErr(a, b, err)
+		return
+	}
+	m.snMgr.Remove(b.Context(), "authnUserID")
+	m.snMgr.Put(b.Context(), "blink", "You have been signed out successfully")
+	http.Redirect(a, b, "/", http.StatusSeeOther)
 }
