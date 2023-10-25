@@ -1,6 +1,7 @@
 {{ define "title"}}Register user{{end}}
 {{ define "main"}}
 <form action='/usr/register' method='POST' novalidate>
+    <input type='hidden' name='csrf' value='{{.CSRFTkn}}'>
     <div>
         <label>Name:</label>
         {{with .Form.AttrErrors.name}}

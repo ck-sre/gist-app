@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/justinas/nosurf"
 	"net/http"
 )
 
@@ -40,4 +41,25 @@ func (msn *mission) resurrectPanic(nxt http.Handler) http.Handler {
 		}()
 		nxt.ServeHTTP(a, b)
 	})
+}
+
+func (msn *mission) needAuthn(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(a http.ResponseWriter, b *http.Request) {
+		if !msn.validAuthn(b) {
+			http.Redirect(a, b, "/usr/signin", http.StatusSeeOther)
+			return
+		}
+		a.Header().Add("Cache-Control", "no-store")
+		next.ServeHTTP(a, b)
+	})
+}
+
+func noSurf(nxt http.Handler) http.Handler {
+	csrfHndlr := nosurf.New(nxt)
+	csrfHndlr.SetBaseCookie(http.Cookie{
+		HttpOnly: true,
+		Path:     "/",
+		Secure:   false,
+	})
+	return csrfHndlr
 }

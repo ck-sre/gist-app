@@ -1,9 +1,21 @@
 {{define "redirect"}}
     <nav>
-        <a href='/'>Landing</a>
-        <a href='/new'>New Gist</a>
-        <a href='/usr/signin'>Login</a>
-        <a href='/usr/register'>Register</a>
-        <a href='/usr/signout'>Signout</a>
+        <div>
+            <a href='/'>Landing</a>
+            {{if .Validauthn}}
+                <a href='/new'>New Gist</a>
+            {{end}}
+        </div>
+        <div>
+            {{ if .Validauthn }}
+                <form action='/usr/signout' method='POST'>
+                    <input type='hidden' name='csrf_tkn' value='{{.CSRFTkn}}'>
+                    <button>Logout</button>
+                </form>
+            {{else}}
+                <a href='/usr/signin'>Login</a>
+                <a href='/usr/register'>Register</a>
+            {{end}}
+        </div>
     </nav>
 {{end}}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-playground/form/v4"
+	"github.com/justinas/nosurf"
 	"net/http"
 	"runtime/debug"
 	"time"
@@ -58,8 +59,10 @@ func (m mission) render(w http.ResponseWriter, r *http.Request, status int, page
 
 func (m mission) newTmplData(a *http.Request) tmplData {
 	return tmplData{
-		PresentYr: time.Now().Year(),
-		Blink:     m.snMgr.PopString(a.Context(), "blink"),
+		PresentYr:  time.Now().Year(),
+		Blink:      m.snMgr.PopString(a.Context(), "blink"),
+		Validauthn: m.validAuthn(a),
+		CSRFTkn:    nosurf.Token(a),
 	}
 }
 
@@ -80,6 +83,6 @@ func (m *mission) dcdPostForm(a *http.Request, destination any) error {
 	return nil
 }
 
-//func (m *mission) validAuthn(a *http.Request) bool {
-//	return m.snMgr.Exists(a.Context(), "authn")
-//}
+func (m *mission) validAuthn(a *http.Request) bool {
+	return m.snMgr.Exists(a.Context(), "authnUserID")
+}

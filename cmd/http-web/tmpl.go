@@ -14,6 +14,8 @@ type tmplData struct {
 	TmplGst     dblayer.Gist
 	Form        any
 	Blink       string
+	Validauthn  bool
+	CSRFTkn     string
 }
 
 func fmtDate(tm time.Time) string {

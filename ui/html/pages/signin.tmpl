@@ -1,6 +1,7 @@
 {{define "title"}} Signin {{end}}
 {{define "main"}}
 <form action='/usr/signin' method='POST' novalidate>
+    <input type='hidden' name='csrf' value='{{.CSRFTkn}}'/>
     {{range .Form.NonAttrErrors}}
         <div class='error'>{{.}}</div>
     {{end}}
