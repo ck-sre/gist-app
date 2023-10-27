@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/justinas/nosurf"
 	"net/http"
@@ -62,4 +63,27 @@ func noSurf(nxt http.Handler) http.Handler {
 		Secure:   false,
 	})
 	return csrfHndlr
+}
+
+func (msn *mission) authn(nxt http.Handler) http.Handler {
+	return http.HandlerFunc(func(a http.ResponseWriter, b *http.Request) {
+		uId := msn.snMgr.GetInt(b.Context(), "authnUserID")
+		if uId == 0 {
+			nxt.ServeHTTP(a, b)
+			return
+		}
+
+		isPresent, err := msn.usrs.CheckExists(uId)
+		if err != nil {
+			msn.serverErr(a, b, err)
+			return
+		}
+
+		if isPresent {
+			ctx := context.WithValue(b.Context(), validCtxKey, true)
+			b = b.WithContext(ctx)
+		}
+		nxt.ServeHTTP(a, b)
+
+	})
 }

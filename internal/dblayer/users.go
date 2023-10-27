@@ -70,5 +70,8 @@ func (m *UserLayer) Authn(email, password string) (int, error) {
 }
 
 func (m *UserLayer) CheckExists(id int) (bool, error) {
-	return false, nil
+	var isPresent bool
+	stmt := "SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)"
+	err := m.MysqlDB.QueryRow(stmt, id).Scan(&isPresent)
+	return isPresent, err
 }

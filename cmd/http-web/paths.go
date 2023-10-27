@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gistapp.ck89.net/ui"
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
 	"net/http"
@@ -14,10 +15,11 @@ func (msn *mission) paths() http.Handler {
 		msn.noFound(a)
 	})
 
-	fs := http.FileServer(http.Dir("./ui/static/"))
-	rtr.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static", fs))
+	fs := http.FileServer(http.FS(ui.Files))
 
-	dyn := alice.New(msn.snMgr.LoadAndSave, noSurf)
+	rtr.Handler(http.MethodGet, "/static/*filepath", fs)
+
+	dyn := alice.New(msn.snMgr.LoadAndSave, noSurf, msn.authn)
 
 	rtr.Handler(http.MethodGet, "/", dyn.ThenFunc(msn.landing))
 	rtr.Handler(http.MethodGet, "/get/:id", dyn.ThenFunc(msn.gistView))

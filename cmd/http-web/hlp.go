@@ -84,5 +84,9 @@ func (m *mission) dcdPostForm(a *http.Request, destination any) error {
 }
 
 func (m *mission) validAuthn(a *http.Request) bool {
-	return m.snMgr.Exists(a.Context(), "authnUserID")
+	validAuthn, ok := a.Context().Value(validCtxKey).(bool)
+	if !ok {
+		return false
+	}
+	return validAuthn
 }
