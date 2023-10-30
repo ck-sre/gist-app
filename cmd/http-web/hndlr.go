@@ -253,3 +253,7 @@ func (m *mission) usrSignoutPost(a http.ResponseWriter, b *http.Request) {
 	m.snMgr.Put(b.Context(), "blink", "You have been signed out successfully")
 	http.Redirect(a, b, "/", http.StatusSeeOther)
 }
+
+func ping(a http.ResponseWriter, b *http.Request) {
+	a.Write([]byte("pong"))
+}

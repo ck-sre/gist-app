@@ -22,11 +22,11 @@ func (msn *mission) logRq(nxt http.Handler) http.Handler {
 
 func midHeaders(nxt http.Handler) http.Handler {
 	return http.HandlerFunc(func(a http.ResponseWriter, b *http.Request) {
-		//a.Header().Set("Content-Security-Policy", "default-src 'self'; style-src 'self'; font-src fonts.gstatic.com")
-		//a.Header().Set("X-Frame-Options", "deny")
-		//a.Header().Set("X-XSS-Protection", "0")
-		//a.Header().Set("X-Content-Type-Options", "nosniff")
-		//a.Header().Set("Referrer-Policy", "origin-when-cross-origin")
+		a.Header().Set("Content-Security-Policy", "default-src 'self'; style-src 'self'; font-src fonts.gstatic.com")
+		a.Header().Set("X-Frame-Options", "deny")
+		a.Header().Set("X-XSS-Protection", "0")
+		a.Header().Set("X-Content-Type-Options", "nosniff")
+		a.Header().Set("Referrer-Policy", "origin-when-cross-origin")
 
 		nxt.ServeHTTP(a, b)
 	})
