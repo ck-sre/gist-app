@@ -14,6 +14,12 @@ type Gist struct {
 	ExpiresOn time.Time
 }
 
+type GistModelIface interface {
+	Add(title, content string, expiresOn int) (int, error)
+	Retrieve(id int) (Gist, error)
+	Recent() ([]Gist, error)
+}
+
 type Gistdblayer struct {
 	DB *sql.DB
 }

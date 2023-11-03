@@ -21,6 +21,12 @@ type UserLayer struct {
 	MysqlDB *sql.DB
 }
 
+type UserModelIface interface {
+	Add(name, email, password string) error
+	Authn(email, password string) (int, error)
+	CheckExists(id int) (bool, error)
+}
+
 func (m *UserLayer) Add(name, email, password string) error {
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 

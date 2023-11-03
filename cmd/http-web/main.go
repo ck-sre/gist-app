@@ -19,11 +19,11 @@ import (
 
 type mission struct {
 	logger    *slog.Logger
-	gists     *dblayer.Gistdblayer
+	gists     dblayer.GistModelIface
 	tmplCache map[string]*template.Template
 	formDcdr  *form.Decoder
 	snMgr     *scs.SessionManager
-	usrs      *dblayer.UserLayer
+	usrs      dblayer.UserModelIface
 }
 
 func main() {
