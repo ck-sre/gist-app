@@ -19,6 +19,8 @@ func (msn *mission) paths() http.Handler {
 
 	rtr.Handler(http.MethodGet, "/static/*filepath", fs)
 
+	rtr.Handler(http.MethodGet, "/ping", http.HandlerFunc(ping))
+
 	dyn := alice.New(msn.snMgr.LoadAndSave, noSurf, msn.authn)
 
 	rtr.Handler(http.MethodGet, "/", dyn.ThenFunc(msn.landing))

@@ -1,14 +1,57 @@
 package main
 
 import (
+	"bytes"
 	"gistapp.ck89.net/internal/dblayer/mocks"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
+	"html"
 	"io"
 	"log/slog"
+	"net/http"
+	"net/http/cookiejar"
+	"net/http/httptest"
+	"regexp"
 	"testing"
 	"time"
 )
+
+var csrfTokenRegex = regexp.MustCompile(`<input type='hidden' name='csrf_token' value='(.*)'>`)
+
+type tServer struct {
+	*httptest.Server
+}
+
+func newTServer(t *testing.T, c http.Handler) *tServer {
+	tsvr := httptest.NewTLSServer(c)
+
+	cJar, err := cookiejar.New(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tsvr.Client().Jar = cJar
+
+	tsvr.Client().CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+
+	return &tServer{tsvr}
+}
+func (tsvr *tServer) retrieve(t *testing.T, uPath string) (int, http.Header, string) {
+	r, err := tsvr.Client().Get(tsvr.URL + uPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer r.Body.Close()
+	bd, err := io.ReadAll(r.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bd = bytes.TrimSpace(bd)
+	return r.StatusCode, r.Header, string(bd)
+
+}
 
 func newTestMission(t *testing.T) *mission {
 	tmplCache, err := newTmplCache()
@@ -29,4 +72,17 @@ func newTestMission(t *testing.T) *mission {
 		formDcdr:  frmDcdr,
 		snMgr:     snMngr,
 	}
+}
+
+func newTestServer(t *testing.T) *httptest.Server {
+	msn := newTestMission(t)
+	return httptest.NewServer(msn.paths())
+}
+
+func getCSRFToken(t *testing.T, bd string) string {
+	matches := csrfTokenRegex.FindStringSubmatch(bd)
+	if len(matches) < 2 {
+		t.Fatal("no csrf token found")
+	}
+	return html.UnescapeString(string(matches[1]))
 }

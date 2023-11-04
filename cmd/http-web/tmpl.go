@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"gistapp.ck89.net/internal/dblayer"
 	"gistapp.ck89.net/ui"
 	"html/template"
@@ -52,7 +51,6 @@ func newTmplCache() (map[string]*template.Template, error) {
 		}
 
 		cache[leafName] = tc
-		fmt.Println("cache leafname", cache[leafName].Name())
 	}
 
 	return cache, nil
