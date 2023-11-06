@@ -9,7 +9,7 @@
         <div>
             {{ if .Validauthn }}
                 <form action='/usr/signout' method='POST'>
-                    <input type='hidden' name='csrf_tkn' value='{{.CSRFTkn}}'>
+                    <input type='hidden' name='csrf' value='{{.CSRFTkn}}'>
                     <button>Logout</button>
                 </form>
             {{else}}

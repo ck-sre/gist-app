@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"gistapp.ck89.net/internal/dblayer/mocks"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
@@ -11,12 +12,13 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"net/url"
 	"regexp"
 	"testing"
 	"time"
 )
 
-var csrfTokenRegex = regexp.MustCompile(`<input type='hidden' name='csrf_token' value='(.*)'>`)
+var csrfTokenRegex = regexp.MustCompile(`<input type='hidden' name='csrf' value='(.+)'>`)
 
 type tServer struct {
 	*httptest.Server
@@ -81,8 +83,24 @@ func newTestServer(t *testing.T) *httptest.Server {
 
 func getCSRFToken(t *testing.T, bd string) string {
 	matches := csrfTokenRegex.FindStringSubmatch(bd)
+	fmt.Println(len(matches))
 	if len(matches) < 2 {
 		t.Fatal("no csrf token found")
 	}
 	return html.UnescapeString(string(matches[1]))
+}
+
+func (tsvr *tServer) postForm(t *testing.T, uPath string, form url.Values) (int, http.Header, string) {
+
+	r, err := tsvr.Client().PostForm(tsvr.URL+uPath, form)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer r.Body.Close()
+	bd, err := io.ReadAll(r.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bd = bytes.TrimSpace(bd)
+	return r.StatusCode, r.Header, string(bd)
 }

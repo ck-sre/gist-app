@@ -3,17 +3,78 @@ package main
 import (
 	"gistapp.ck89.net/internal/assert"
 	"net/http"
-	"net/http/httptest"
+	"net/url"
 	"testing"
 )
 
 func TestUserRegister(t *testing.T) {
 	msn := newTestMission(t)
-	ts := httptest.NewServer(msn.paths())
+	ts := newTServer(t, msn.paths())
 	defer ts.Close()
 
-	//_,_,body := ts.get(t, "/user/register")
-	t.Logf("body should have been here %s", "body")
+	_, _, body := ts.retrieve(t, "/usr/register")
+	//t.Logf("body should have been here %s", body)
+	csrftTkn := getCSRFToken(t, body)
+
+	const (
+		rightName  = "Marley"
+		rightPwd   = "testMarleypwd"
+		rightEmail = "marley@snakeoil.com"
+		rightTag   = "<form action='/usr/register' method='post' novalidate>"
+	)
+
+	tsts := []struct {
+		name        string
+		userName    string
+		userPwd     string
+		userEmail   string
+		csrfToken   string
+		wantCode    int
+		wantBody    string
+		wantFormTag string
+	}{
+		{
+			name:      "right user",
+			userName:  rightName,
+			userEmail: rightEmail,
+			userPwd:   rightPwd,
+			csrfToken: csrftTkn,
+			wantCode:  http.StatusSeeOther,
+		},
+		{
+			name:      "invalid csrf Token",
+			userName:  rightName,
+			userEmail: rightEmail,
+			userPwd:   rightPwd,
+			csrfToken: "invalid",
+			wantCode:  http.StatusBadRequest,
+		},
+		{
+			name:      "empty name",
+			userEmail: rightEmail,
+			userPwd:   rightPwd,
+			csrfToken: csrftTkn,
+		},
+	}
+
+	for _, tst := range tsts {
+		t.Run(tst.name, func(t *testing.T) {
+			form := url.Values{}
+			form.Add("name", tst.userName)
+			form.Add("email", tst.userEmail)
+			form.Add("password", tst.userPwd)
+			form.Add("csrf", tst.csrfToken)
+			code, _, body := ts.postForm(t, "/usr/register", form)
+			assert.Same(t, code, tst.wantCode)
+			if tst.wantBody != "" {
+				assert.StringHas(t, body, tst.wantBody)
+			}
+			if tst.wantFormTag != "" {
+				assert.StringHas(t, body, tst.wantFormTag)
+			}
+		})
+	}
+
 }
 
 func TestPing(t *testing.T) {
