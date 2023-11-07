@@ -18,3 +18,10 @@ func StringHas(t *testing.T, real, expected string) {
 		t.Errorf("Git: %q, Expected %q", real, expected)
 	}
 }
+
+func NilError(t *testing.T, got error) {
+	t.Helper()
+	if got != nil {
+		t.Errorf("got: %v; expected nil", got)
+	}
+}
