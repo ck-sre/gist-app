@@ -24,6 +24,7 @@ func (msn *mission) paths() http.Handler {
 	dyn := alice.New(msn.snMgr.LoadAndSave, noSurf, msn.authn)
 
 	rtr.Handler(http.MethodGet, "/", dyn.ThenFunc(msn.landing))
+	rtr.Handler(http.MethodGet, "/info", dyn.ThenFunc(msn.info))
 	rtr.Handler(http.MethodGet, "/get/:id", dyn.ThenFunc(msn.gistView))
 	rtr.Handler(http.MethodGet, "/usr/register", dyn.ThenFunc(msn.usrRegister))
 	rtr.Handler(http.MethodPost, "/usr/register", dyn.ThenFunc(msn.usrRegPost))

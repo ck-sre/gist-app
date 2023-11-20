@@ -141,6 +141,12 @@ func (m *mission) gistRecents(a http.ResponseWriter, b *http.Request) {
 
 }
 
+func (m *mission) info(a http.ResponseWriter, b *http.Request) {
+	gData := m.newTmplData(b)
+	m.render(a, b, http.StatusOK, "info.tmpl", gData)
+	//fmt.Fprintf(a, "This is a gist app")
+}
+
 func (m *mission) usrRegister(a http.ResponseWriter, b *http.Request) {
 	tmplData := m.newTmplData(b)
 	tmplData.Form = usrRegisterForm{}
