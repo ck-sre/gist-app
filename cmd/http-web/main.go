@@ -18,6 +18,7 @@ import (
 )
 
 type mission struct {
+	debug     bool
 	logger    *slog.Logger
 	gists     dblayer.GistModelIface
 	tmplCache map[string]*template.Template
@@ -32,11 +33,13 @@ func main() {
 	type cfg struct {
 		port   string
 		dbconn string
+		debug  bool
 	}
 	var cf cfg
 
 	flag.StringVar(&cf.port, "port", ":9100", "port to listen on")
 	flag.StringVar(&cf.dbconn, "dbconn", "gistuser:pwd@(localhost:3306)/gistapp?parseTime=true", "connection string for mysql")
+	flag.BoolVar(&cf.debug, "debug", false, "Enable debug flag")
 	flag.Parse()
 
 	//Logging
@@ -64,6 +67,7 @@ func main() {
 	snMgr.Cookie.Secure = true
 
 	msn := &mission{
+		debug:     cf.debug,
 		logger:    logger,
 		gists:     &dblayer.Gistdblayer{DB: mysqlDB},
 		tmplCache: tmplCache,

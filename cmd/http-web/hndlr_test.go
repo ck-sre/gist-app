@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"gistapp.ck89.net/internal/assert"
 	"net/http"
 	"net/url"
@@ -148,4 +149,38 @@ func TestGistView(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGistWrite(t *testing.T) {
+	msn := newTestMission(t)
+	ts := newTServer(t, msn.paths())
+	defer ts.Close()
+
+	//_, _, body := ts.retrieve(t, "/usr/register")
+	////t.Logf("body should have been here %s", body)
+	//csrftTkn := getCSRFToken(t, body)
+
+	t.Run("Unauthn user", func(t *testing.T) {
+		code, headers, _ := ts.retrieve(t, "/new")
+		assert.Same(t, code, http.StatusSeeOther)
+		assert.Same(t, headers.Get("Location"), "/usr/signin")
+	})
+
+	t.Run("Authn user", func(t *testing.T) {
+		_, _, body := ts.retrieve(t, "/usr/register")
+		csrfTkn := getCSRFToken(t, body)
+		fmt.Println(csrfTkn)
+		form := url.Values{}
+		form.Add("email", "fred@dong.com")
+		form.Add("password", "testFredpwd")
+		form.Add("csrf", csrfTkn)
+
+		ts.postForm(t, "/usr/signin", form)
+
+		code, _, body := ts.retrieve(t, "/new")
+
+		assert.Same(t, code, http.StatusOK)
+		assert.StringHas(t, body, "<form action='/new' method='POST'>")
+	})
+
 }

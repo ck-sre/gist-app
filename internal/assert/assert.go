@@ -15,7 +15,7 @@ func Same[T comparable](t *testing.T, got, exp T) {
 func StringHas(t *testing.T, real, expected string) {
 	t.Helper()
 	if !strings.Contains(real, expected) {
-		t.Errorf("Git: %q, Expected %q", real, expected)
+		t.Errorf("Got: %q, Expected %q", real, expected)
 	}
 }
 
