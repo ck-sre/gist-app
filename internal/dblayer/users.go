@@ -21,10 +21,26 @@ type UserLayer struct {
 	MysqlDB *sql.DB
 }
 
-type UserModelIface interface {
+type UserLayerIface interface {
 	Add(name, email, password string) error
 	Authn(email, password string) (int, error)
 	CheckExists(id int) (bool, error)
+	Fetch(id int) (User, error)
+}
+
+func (m *UserLayer) Fetch(id int) (User, error) {
+	var user User
+	stmt := `SELECT id, name, email, created FROM users WHERE id = ?`
+
+	err := m.MysqlDB.QueryRow(stmt, id).Scan(&user.ID, &user.Name, &user.Email, &user.Created)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return User{}, ErrRecordNotFound
+		} else {
+			return User{}, err
+		}
+	}
+	return user, nil
 }
 
 func (m *UserLayer) Add(name, email, password string) error {

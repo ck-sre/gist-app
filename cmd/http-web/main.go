@@ -24,7 +24,7 @@ type mission struct {
 	tmplCache map[string]*template.Template
 	formDcdr  *form.Decoder
 	snMgr     *scs.SessionManager
-	usrs      dblayer.UserModelIface
+	usrs      dblayer.UserLayerIface
 }
 
 func main() {

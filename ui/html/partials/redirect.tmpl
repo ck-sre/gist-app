@@ -9,6 +9,7 @@
         </div>
         <div>
             {{ if .Validauthn }}
+                <a href='/usr/view'>UserInfo</a>
                 <form action='/usr/signout' method='POST'>
                     <input type='hidden' name='csrf' value='{{.CSRFTkn}}'>
                     <button>Logout</button>

@@ -263,3 +263,22 @@ func (m *mission) usrSignoutPost(a http.ResponseWriter, b *http.Request) {
 func ping(a http.ResponseWriter, b *http.Request) {
 	a.Write([]byte("pong"))
 }
+
+func (m *mission) usrView(a http.ResponseWriter, b *http.Request) {
+	uID := m.snMgr.GetInt(b.Context(), "authnUserID")
+
+	usr, err := m.usrs.Fetch(uID)
+	if err != nil {
+		if errors.Is(err, dblayer.ErrNoRecord) {
+			http.Redirect(a, b, "/usr/signin", http.StatusSeeOther)
+		} else {
+			m.serverErr(a, b, err)
+		}
+		return
+	}
+
+	data := m.newTmplData(b)
+	data.User = usr
+	m.render(a, b, http.StatusOK, "userview.tmpl", data)
+	fmt.Fprintf(a, "%+v", usr)
+}

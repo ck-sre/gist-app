@@ -1,6 +1,9 @@
 package mocks
 
-import "gistapp.ck89.net/internal/dblayer"
+import (
+	"gistapp.ck89.net/internal/dblayer"
+	"time"
+)
 
 type UserLayer struct{}
 
@@ -28,4 +31,17 @@ func (u *UserLayer) CheckExists(id int) (bool, error) {
 	default:
 		return false, nil
 	}
+}
+
+func (u *UserLayer) Fetch(id int) (dblayer.User, error) {
+	if id == 1 {
+		u := dblayer.User{
+			ID:      1,
+			Name:    "cksre",
+			Email:   "cksre@gmail.com",
+			Created: time.Now(),
+		}
+		return u, nil
+	}
+	return dblayer.User{}, dblayer.ErrNoRecord
 }

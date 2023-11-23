@@ -17,6 +17,7 @@ type tmplData struct {
 	Blink       string
 	Validauthn  bool
 	CSRFTkn     string
+	User        dblayer.User
 }
 
 func fmtDate(tm time.Time) string {

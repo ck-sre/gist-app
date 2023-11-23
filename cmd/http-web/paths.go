@@ -35,6 +35,7 @@ func (msn *mission) paths() http.Handler {
 
 	rtr.Handler(http.MethodGet, "/new", protec.ThenFunc(msn.gistWrite))
 	rtr.Handler(http.MethodPost, "/new", protec.ThenFunc(msn.gistWriteNote))
+	rtr.Handler(http.MethodGet, "/usr/view", protec.ThenFunc(msn.usrView))
 	rtr.Handler(http.MethodGet, "/usr/signout", protec.ThenFunc(msn.usrSignoutPost))
 
 	stdMid := alice.New(msn.resurrectPanic, msn.logRq, midHeaders)
