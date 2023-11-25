@@ -245,6 +245,12 @@ func (m *mission) usrSigninPost(a http.ResponseWriter, b *http.Request) {
 
 	m.snMgr.Put(b.Context(), "authnUserID", id)
 
+	pathAfterAuthn := m.snMgr.PopString(b.Context(), "pathAfterAuthn")
+	if pathAfterAuthn != "" {
+		http.Redirect(a, b, pathAfterAuthn, http.StatusSeeOther)
+		return
+	}
+
 	fmt.Fprintf(a, "This is a user signin creation")
 	http.Redirect(a, b, "/new", http.StatusSeeOther)
 }

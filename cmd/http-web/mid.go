@@ -47,6 +47,7 @@ func (msn *mission) resurrectPanic(nxt http.Handler) http.Handler {
 func (msn *mission) needAuthn(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(a http.ResponseWriter, b *http.Request) {
 		if !msn.validAuthn(b) {
+			msn.snMgr.Put(b.Context(), "pathAfterAuthn", b.URL.RequestURI())
 			http.Redirect(a, b, "/usr/signin", http.StatusSeeOther)
 			return
 		}

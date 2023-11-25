@@ -35,7 +35,7 @@ func (m *UserLayer) Fetch(id int) (User, error) {
 	err := m.MysqlDB.QueryRow(stmt, id).Scan(&user.ID, &user.Name, &user.Email, &user.Created)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return User{}, ErrRecordNotFound
+			return User{}, ErrNoRecord
 		} else {
 			return User{}, err
 		}
