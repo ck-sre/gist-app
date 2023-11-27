@@ -26,6 +26,7 @@ type UserLayerIface interface {
 	Authn(email, password string) (int, error)
 	CheckExists(id int) (bool, error)
 	Fetch(id int) (User, error)
+	ChgPwd(id int, oldPwd, newPwd string) error
 }
 
 func (m *UserLayer) Fetch(id int) (User, error) {
@@ -96,4 +97,34 @@ func (m *UserLayer) CheckExists(id int) (bool, error) {
 	stmt := "SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)"
 	err := m.MysqlDB.QueryRow(stmt, id).Scan(&isPresent)
 	return isPresent, err
+}
+
+func (m *UserLayer) ChgPwd(id int, oldPwd, newPwd string) error {
+	var oldHashedPwd []byte
+
+	currPwdstmt := `SELECT hashed_password FROM users WHERE id = ?`
+	err := m.MysqlDB.QueryRow(currPwdstmt, id).Scan(&oldHashedPwd)
+	if err != nil {
+		return err
+	}
+
+	err = bcrypt.CompareHashAndPassword(oldHashedPwd, []byte(oldPwd))
+
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return ErrInvalidCredentials
+		} else {
+			return err
+		}
+	}
+
+	newHashedPwd, err := bcrypt.GenerateFromPassword([]byte(newPwd), bcrypt.DefaultCost)
+
+	if err != nil {
+		return err
+	}
+
+	newPwdStmt := `UPDATE users SET hashed_password = ? WHERE id = ?`
+	_, err = m.MysqlDB.Exec(newPwdStmt, newHashedPwd, id)
+	return err
 }

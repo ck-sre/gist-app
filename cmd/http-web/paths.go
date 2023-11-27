@@ -37,6 +37,8 @@ func (msn *mission) paths() http.Handler {
 	rtr.Handler(http.MethodPost, "/new", protec.ThenFunc(msn.gistWriteNote))
 	rtr.Handler(http.MethodGet, "/usr/view", protec.ThenFunc(msn.usrView))
 	rtr.Handler(http.MethodGet, "/usr/signout", protec.ThenFunc(msn.usrSignoutPost))
+	rtr.Handler(http.MethodGet, "/usr/pwd/chg", protec.ThenFunc(msn.usrPwdChg))
+	rtr.Handler(http.MethodPost, "/usr/pwd/chg", protec.ThenFunc(msn.usrPwdChgPost))
 
 	stdMid := alice.New(msn.resurrectPanic, msn.logRq, midHeaders)
 	return stdMid.Then(rtr)

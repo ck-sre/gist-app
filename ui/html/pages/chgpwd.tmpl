@@ -1,0 +1,32 @@
+{{ define "title"}}Chg Pwd{{end}}
+
+{{ define "main"}}
+<h2>Change Password</h2>
+<form action="/usr/pwd/chg" method="POST" novalidate>
+  <input type="hidden" name="csrf" value="{{.CSRFTkn}}">
+  <div>
+    <label>Old Pwd</label>
+    {{ with .Form.FieldErrors.oldPwd }}
+      <label class="error">{{.}}</label>
+    {{end}}
+    <input type="password" name="oldPwd" value="{{.Form.oldPwd}}">
+  </div>
+  <div>
+    <label>New Pwd</label>
+    {{ with .Form.FieldErrors.newPwd }}
+      <label class="error">{{.}}</label>
+    {{end}}
+    <input type="password" name="oldPwd" value="{{.Form.newPwd}}">
+  </div>
+  <div>
+    <label>Confirm New Pwd</label>
+    {{ with .Form.FieldErrors.newPwdCnfm }}
+      <label class="error">{{.}}</label>
+    {{end}}
+    <input type="password" name="newPwdCnfm">
+  </div>
+    <div>
+        <input type="submit" value="Change Pwd">
+    </div>
+</form>
+{{end}}

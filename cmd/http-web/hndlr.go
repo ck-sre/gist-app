@@ -31,6 +31,13 @@ type usrSigninForm struct {
 	checker.Checker `form:"-"`
 }
 
+type usrPwdChgForm struct {
+	OldPwd          string `form:"oldPwd"`
+	NewPwd          string `form:"newPwd"`
+	NewPwdCnfm      string `form:"newPwdCnfm"`
+	checker.Checker `form:"-"`
+}
+
 // landing function gives byte slice as a response body
 func (m *mission) landing(a http.ResponseWriter, b *http.Request) {
 
@@ -287,4 +294,51 @@ func (m *mission) usrView(a http.ResponseWriter, b *http.Request) {
 	data.User = usr
 	m.render(a, b, http.StatusOK, "userview.tmpl", data)
 	fmt.Fprintf(a, "%+v", usr)
+}
+
+func (m *mission) usrPwdChg(a http.ResponseWriter, b *http.Request) {
+	data := m.newTmplData(b)
+	m.render(a, b, http.StatusOK, "pwdchg.tmpl", data)
+}
+
+func (m *mission) usrPwdChgPost(a http.ResponseWriter, b *http.Request) {
+
+	var form usrPwdChgForm
+
+	err := m.dcdPostForm(b, &form)
+	if err != nil {
+		m.clErr(a, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckAttr(checker.NotEmpty(form.OldPwd), "oldPwd", "This field cannot be blank")
+	form.CheckAttr(checker.NotEmpty(form.NewPwd), "newPwd", "This field cannot be blank")
+	form.CheckAttr(checker.NotEmpty(form.NewPwdCnfm), "newPwdCnfm", "This field cannot be blank")
+	form.CheckAttr(checker.CharMin(form.NewPwdCnfm, 8), "newPwdCnfm", "This field must be at least 8 characters long")
+	form.CheckAttr(form.NewPwdCnfm == form.NewPwd, "newPwdCnfm", "This field must match the new password")
+
+	if !form.CheckPassed() {
+		data := m.newTmplData(b)
+		data.Form = form
+		m.render(a, b, http.StatusUnprocessableEntity, "pwdchg.tmpl", data)
+		return
+	}
+
+	usrID := m.snMgr.GetInt(b.Context(), "authnUserID")
+
+	err = m.usrs.ChgPwd(usrID, form.OldPwd, form.NewPwd)
+	if err != nil {
+		if errors.Is(err, dblayer.ErrInvalidCredentials) {
+			form.AddNonAttrErrors("Invalid credentials")
+			data := m.newTmplData(b)
+			data.Form = form
+			m.render(a, b, http.StatusUnprocessableEntity, "chgpwd.tmpl", data)
+		} else {
+			m.serverErr(a, b, err)
+		}
+		return
+	}
+
+	m.snMgr.Put(b.Context(), "blink", "Your password has been changed successfully")
+	http.Redirect(a, b, "/usr/view", http.StatusSeeOther)
 }

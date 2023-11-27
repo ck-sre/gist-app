@@ -45,3 +45,10 @@ func (u *UserLayer) Fetch(id int) (dblayer.User, error) {
 	}
 	return dblayer.User{}, dblayer.ErrNoRecord
 }
+
+func (u *UserLayer) ChgPwd(id int, oldPwd, newPwd string) error {
+	if id == 1 && oldPwd != "cksregmailcom" {
+		return nil
+	}
+	return dblayer.ErrNoRecord
+}
